@@ -2,12 +2,12 @@
 % Please edit documentation in R/draw_gibbs.R
 \name{draw_gibbs}
 \alias{draw_gibbs}
-\title{Run Gibbs sampler for string mixture model, progress bar,
-flexible priors and data-driven defaults for init.}
+\title{Run Gibbs sampler for string mixture model (fixed λ)}
 \usage{
 draw_gibbs(
   data,
   neighbor_list,
+  lambda = 1,
   priors = list(),
   init = list(),
   n_iter = 10000,
@@ -23,18 +23,30 @@ draw_gibbs(
 $j: integer vector of neighbor indices
 $d: numeric vector of edit distances}
 
+\item{lambda}{Numeric; fixed scale parameter for error kernel (default 1)}
+
 \item{priors}{Optional named list of priors.}
 
-\item{init}{Optional named list of initial values.}
+\item{init}{Optional named list of initial values (excludes λ).}
 
-\item{n_iter}{Total MCMC iterations}
+\item{n_iter}{Total MCMC iterations (default 10000)}
 
-\item{burnin}{Burn-in iterations}
+\item{burnin}{Burn-in iterations (default 1000)}
 }
 \value{
-Posterior results: delta_samples, lambda_samples, x_avg, p_avg
+A list with:
+\itemize{
+\item \code{delta_samples}: numeric vector of sampled error rates post-burnin
+\item \code{x_avg}: posterior mean of inclusion indicator \code{x}
+\item \code{p_avg}: posterior mean of mixture weights \code{p}
+}
 }
 \description{
-Run Gibbs sampler for string mixture model, progress bar,
-flexible priors and data-driven defaults for init.
+Run Gibbs sampler for string mixture model (fixed λ)
+}
+\examples{
+# Assuming sampleZ_cpp is compiled and available
+df <- data.frame(string = c("a","b","c"), count = c(10,5,1))
+nbrs <- list(list(j=c(2),d=c(1)), list(j=c(1,3),d=c(1,2)), list(j=2,d=2))
+out <- draw_gibbs(df, nbrs, lambda=1, n_iter=100, burnin=10)
 }

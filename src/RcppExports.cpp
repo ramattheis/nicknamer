@@ -11,8 +11,8 @@ Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
 // sampleZ_cpp
-List sampleZ_cpp(const IntegerVector& n, const NumericVector& p, double delta, const List& neighbor_list, const NumericMatrix& dist_mat, double lambda);
-RcppExport SEXP _nicknamer_sampleZ_cpp(SEXP nSEXP, SEXP pSEXP, SEXP deltaSEXP, SEXP neighbor_listSEXP, SEXP dist_matSEXP, SEXP lambdaSEXP) {
+List sampleZ_cpp(const IntegerVector& n, const NumericVector& p, double delta, const List& neighbor_list, const List& G_list);
+RcppExport SEXP _nicknamer_sampleZ_cpp(SEXP nSEXP, SEXP pSEXP, SEXP deltaSEXP, SEXP neighbor_listSEXP, SEXP G_listSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -20,30 +20,14 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector& >::type p(pSEXP);
     Rcpp::traits::input_parameter< double >::type delta(deltaSEXP);
     Rcpp::traits::input_parameter< const List& >::type neighbor_list(neighbor_listSEXP);
-    Rcpp::traits::input_parameter< const NumericMatrix& >::type dist_mat(dist_matSEXP);
-    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(sampleZ_cpp(n, p, delta, neighbor_list, dist_mat, lambda));
-    return rcpp_result_gen;
-END_RCPP
-}
-// sampleLambda_cpp
-double sampleLambda_cpp(const NumericVector& d_off, const NumericVector& z_off, double lambda, double lambda_rate);
-RcppExport SEXP _nicknamer_sampleLambda_cpp(SEXP d_offSEXP, SEXP z_offSEXP, SEXP lambdaSEXP, SEXP lambda_rateSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const NumericVector& >::type d_off(d_offSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type z_off(z_offSEXP);
-    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< double >::type lambda_rate(lambda_rateSEXP);
-    rcpp_result_gen = Rcpp::wrap(sampleLambda_cpp(d_off, z_off, lambda, lambda_rate));
+    Rcpp::traits::input_parameter< const List& >::type G_list(G_listSEXP);
+    rcpp_result_gen = Rcpp::wrap(sampleZ_cpp(n, p, delta, neighbor_list, G_list));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_nicknamer_sampleZ_cpp", (DL_FUNC) &_nicknamer_sampleZ_cpp, 6},
-    {"_nicknamer_sampleLambda_cpp", (DL_FUNC) &_nicknamer_sampleLambda_cpp, 4},
+    {"_nicknamer_sampleZ_cpp", (DL_FUNC) &_nicknamer_sampleZ_cpp, 5},
     {NULL, NULL, 0}
 };
 
