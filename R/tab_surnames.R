@@ -1,15 +1,28 @@
-#' Clean and collapse a vector of (English-language) surnames
+#' Clean a vector of (English-language) surnames
 #'
-#' Takes raw character strings, lower-cases them, removes spaces and apostrophes,
-#' then blanks out any single-letter result or any string that is >50% non-alphanumeric.
-#' Finally tabulates the cleaned names and returns a data.frame of unique names and their counts.
+#' @description
+#' `clean_surnames()` takes a character vector of raw surname strings and
+#' returns a vector of "cleaned" or empty strings if the input is too ambiguous
 #'
-#' @param raw_names Character vector of raw surname strings.
-#' @return A data.frame with columns:
-#'   * `name` — cleaned, unique surnames
-#'   * `count` — number of occurrences
+#' @details
+#' The function performs the following steps:
+#' \enumerate{
+#'   \item Convert all strings to lowercase.
+#'   \item Remove common suffixes “jr” and “sr”.
+#'   \item Strip spaces and apostrophes.
+#'   \item Standardize “missing‐letter” markers:
+#'   \item Remove all digits.
+#'   \item Blank out remaining names still containing non-letter/space characters.
+#'   \item Blank out known placeholders: “unreadable”, “unknown”, “ blank ”, “alias”.
+#'   \item Blank out any name of length ≤1.
+#'   \item Blank out uncommon names of length 2.
+#'   \item Blank out names with >25% missing characters.
+#' }
+#'
+#' @param raw_names Character vector of raw surname strings to be cleaned.
+#' @return A character vector of cleaned or blank names the same length as `raw_names`
 #' @export
-tab_surnames <- function(raw_names) {
+clean_surnames <- function(raw_names) {
 
   # 1) lowercase
   cleaned <- tolower(raw_names)
@@ -27,13 +40,13 @@ tab_surnames <- function(raw_names) {
   cleaned <- gsub( "(?<=[a-z])[^a-z]{2}(?=[a-z]{3})", " ", cleaned, perl = TRUE)
   cleaned <- gsub( "(^[^a-z]{1,2}(?=[a-z]{4}))|((?<=[a-z]{4})[^a-z]{1,2}$)", " ", cleaned, perl = TRUE)
 
-  # 6) removing numbers
+  # 5) removing numbers
   cleaned <- gsub("[0-9]","",cleaned)
 
-  # 7) blank out names with any remaining non-letters
+  # 6) blank out names with any remaining non-letters
   cleaned[ grepl("[^a-z ]","",cleaned)] = ""
 
-  # 8) blank out common issues
+  # 7) blank out common issues
   cleaned[grepl("unreadable",cleaned)] = ""
   cleaned[grepl("unknown",cleaned)] = ""
   cleaned[grepl(" blank ",cleaned)] = ""
@@ -47,17 +60,10 @@ tab_surnames <- function(raw_names) {
                 "ko", "me", "ek", "ax", "re", "sy", "ey", "ox")
   cleaned[ nchar(cleaned) <= 2 & !(cleaned %in% twochars )] = ""
 
-  # blank out names with too many missing characters
+  # 9) blank out names with too many missing characters
   cleaned[(nchar(gsub("\\s+","",cleaned)) / nchar(cleaned)) < 0.75] = ""
 
-  # 9) tabulate and return sorted data.frame
-  tbl <- table(cleaned, useNA = "no")
-  df  <- data.frame(
-    name  = names(tbl),
-    count = as.integer(tbl),
-    stringsAsFactors = FALSE
-  )
-  df <- df[order(-df$count), , drop = FALSE]
-  rownames(df) <- NULL
-  df
+  # Return the vector of clean surnames
+  return(cleaned)
+
 }
