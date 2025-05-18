@@ -8,7 +8,7 @@ find_neighbors(
   strings,
   method = "jw",
   max_dist = ifelse(method \%in\% c("jw", "cosine", "jaccard"), 0.3, 3),
-  ncores = parallel::detectCores()
+  ncores = 1
 )
 }
 \arguments{
@@ -26,7 +26,7 @@ are returned as neighbors.  Defaults to 3 for edit
 distances and 0.3 for similarity‐based metrics.}
 
 \item{ncores}{Integer ≥ 1; number of parallel worker processes to launch.
-Defaults to \code{parallel::detectCores()}.}
+Defaults to 1.}
 }
 \value{
 A \strong{named} list of length \code{length(strings)}.  Each element is a

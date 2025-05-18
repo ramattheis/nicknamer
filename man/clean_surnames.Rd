@@ -34,7 +34,7 @@ The function performs the following steps:
 \item Standardize “missing‐letter” markers:
 \item Remove all digits.
 \item Blank out remaining names still containing non-letter/space characters.
-\item Blank out known placeholders: “unreadable”, “unknown”, “ blank ”, “alias”.
+\item Blank out known placeholders: “unreadable”, “unknown”, etc.
 \item Blank out any name of length ≤1.
 \item Blank out uncommon names of length 2.
 \item Blank out names with >25\% missing characters.
