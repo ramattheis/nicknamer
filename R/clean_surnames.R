@@ -66,7 +66,7 @@ clean_surnames <- function(raw_names) {
   cleaned[ nchar(cleaned) <= 2 & !(cleaned %in% twochars )] = ""
 
   # 10) blank out names with too many missing characters
-  cleaned[(nchar(gsub("\\s+","",cleaned)) / nchar(cleaned)) < 0.75] = ""
+  cleaned[(nchar(gsub("\\?","",cleaned)) / nchar(cleaned)) < 0.75] = ""
 
   # Return the vector of clean surnames
   return(cleaned)
