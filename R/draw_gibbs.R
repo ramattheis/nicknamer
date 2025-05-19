@@ -10,7 +10,6 @@
 #' @param priors        Optional named list of priors.
 #' @param init          Optional named list of initial values (excludes λ).
 #' @param n_iter        Total MCMC iterations (default 10000)
-#' @param burnin        Burn-in iterations (default 1000)
 #'
 #' @return A list with:
 #'   - `delta_samples`: numeric vector of sampled error rates post-burnin
@@ -31,8 +30,7 @@ draw_gibbs <- function(data,
                        lambda        = 1,
                        priors        = list(),
                        init          = list(),
-                       n_iter        = 10000,
-                       burnin        = 1000) {
+                       n_iter        = 10000) {
   n <- data$count
   K <- nrow(data)
 
@@ -68,9 +66,9 @@ draw_gibbs <- function(data,
     G_list[[i]] <- w / sum(w)
   }
 
-  # Storage for post-burnin
-  n_save        <- max(n_iter - burnin, 0)
-  delta_samples <- numeric(n_save)
+  # Storage
+  delta_samples <- numeric(n_iter)
+  iter_sum      <- numeric(1)
   x_sum         <- numeric(K)
   p_sum         <- numeric(K)
 
@@ -105,7 +103,7 @@ draw_gibbs <- function(data,
 
     # 4. Update x | Z
     lbf_vec <- lgamma(dirichlet_alpha + spike_epsilon + T_i) - lgamma(dirichlet_alpha + spike_epsilon) -
-      (lgamma(spike_epsilon + T_i)             - lgamma(spike_epsilon))
+      (lgamma(spike_epsilon + T_i) - lgamma(spike_epsilon))
     log_prior <- log(presence_alpha) - log(presence_beta)
     post_odds <- exp(log_prior + lbf_vec)
     x         <- rbinom(K, 1, post_odds / (1 + post_odds))
@@ -114,9 +112,10 @@ draw_gibbs <- function(data,
     delta <- rbeta(1, error_alpha + E, error_beta + S)
 
     # Store
-    if(iter > burnin) {
-      save_idx               <- save_idx + 1
-      delta_samples[save_idx] <- delta
+    save_idx <- save_idx + 1
+    delta_samples[save_idx] <- delta
+    if( iter > n_iter/2 ){ # Baking in a 1/2 time burn-in for posterior means
+      iter_sum <- iter_sum + 1
       x_sum <- x_sum + x
       p_sum <- p_sum + p
     }
@@ -125,8 +124,8 @@ draw_gibbs <- function(data,
 
   list(
     delta_samples = delta_samples,
-    x_avg         = x_sum / n_save,
-    p_avg         = p_sum / n_save
+    x_avg         = x_sum / iter_sum,
+    p_avg         = p_sum / iter_sum
   )
 }
 

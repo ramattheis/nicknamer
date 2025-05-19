@@ -10,8 +10,7 @@ draw_gibbs(
   lambda = 1,
   priors = list(),
   init = list(),
-  n_iter = 10000,
-  burnin = 1000
+  n_iter = 10000
 )
 }
 \arguments{
@@ -30,8 +29,6 @@ $d: numeric vector of edit distances}
 \item{init}{Optional named list of initial values (excludes λ).}
 
 \item{n_iter}{Total MCMC iterations (default 10000)}
-
-\item{burnin}{Burn-in iterations (default 1000)}
 }
 \value{
 A list with:
