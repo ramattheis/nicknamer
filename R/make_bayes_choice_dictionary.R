@@ -26,7 +26,7 @@
 #'
 #' @return A data.frame with two columns:
 #'   - `observed`: string vector of observed names.
-#'   - `standard`: string vector of standardized names.
+#'   - `standard`: string vector of standardized names (`NA` if name is ambiguous).
 #'
 #' @importFrom parallel makeCluster stopCluster
 #' @importFrom pbapply pblapply
@@ -40,52 +40,13 @@ make_bayes_choice_dictionary <- function(
     ncores  = 1
 ) {
 
-  # Combining posterior information into one list
-  packed = lapply(seq_along(data$string), function(k)
-    list(
-      name = data$string[k],
-      nb = neighbor_list[[k]],
-      id = k,
-      x = post$x_avg[k],
-      p = post$p_avg[k],
-      xs = post$x_avg[neighbor_list[[k]]$j],
-      ps = post$p_avg[neighbor_list[[k]]$j]
-    )
+  # Re-packing data into a list of length K
+  packed = pack_name_posterior_cpp(
+    data$string,
+    neighbor_list,
+    post$x_avg,
+    post$p_avg
   )
-
-  # Helper function for classifying individual surnames
-  bayes_choice_helper = function(pack){
-    # unpacking
-    observed = pack$name
-    nbs = pack$nb
-    id = pack$id
-    x = as.numeric(pack$x > 0.99)
-    p = pack$p
-    xs = as.numeric(pack$xs > 0.99)
-    ps = pack$ps
-
-    # Computing posterior
-    phi_self = (1-delta)*p*x
-
-    # Computing off-diagonal posterior
-    ws = xs*exp(-nbs$d/lambda)
-    ws = if(max(ws) > 0){ws/sum(ws)} else {ws}
-    phis = delta*ps*ws
-
-    # Picking posterior mode
-    if(max(c(phi_self, phis)) == 0){
-      bayes_choice_id = NA
-    } else {
-      if(phi_self > max(phis)){
-        bayes_choice_id = id
-      } else {
-        bayes_choice_id = nbs$j[which(phis == max(phis))][1]
-      }
-    }
-
-    # Returning self + bayes choice
-    as.data.frame(cbind(observed, bayes_choice_id))
-  }
 
   # Setting up the cluster
   cl <- parallel::makeCluster(ncores)
@@ -93,14 +54,14 @@ make_bayes_choice_dictionary <- function(
   # export your globals and functions
   delta = mean(post$delta_samples)
   parallel::clusterExport(cl,
-                varlist = c("delta", "lambda", "bayes_choice_helper"),
+                varlist = c("delta", "lambda", "make_bayes_choice_dictionary_helper"),
                 envir   = environment()
   )
 
   # Finding the bayes choice (index) for each name
   bayes_choices <- pbapply::pblapply(
     X   = packed,
-    FUN = bayes_choice_helper,
+    FUN = make_bayes_choice_dictionary_helper,
     cl  = cl
   )
   bayes_choices = do.call(rbind,bayes_choices)

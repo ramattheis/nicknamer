@@ -10,6 +10,20 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// pack_name_posterior_cpp
+List pack_name_posterior_cpp(CharacterVector names, List neighbor_list, NumericVector x_avg, NumericVector p_avg);
+RcppExport SEXP _nicknamer_pack_name_posterior_cpp(SEXP namesSEXP, SEXP neighbor_listSEXP, SEXP x_avgSEXP, SEXP p_avgSEXP) {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    Rcpp::traits::input_parameter< CharacterVector >::type names(namesSEXP);
+    Rcpp::traits::input_parameter< List >::type neighbor_list(neighbor_listSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type x_avg(x_avgSEXP);
+    Rcpp::traits::input_parameter< NumericVector >::type p_avg(p_avgSEXP);
+    rcpp_result_gen = Rcpp::wrap(pack_name_posterior_cpp(names, neighbor_list, x_avg, p_avg));
+    return rcpp_result_gen;
+END_RCPP
+}
 // sampleZ_cpp
 List sampleZ_cpp(const IntegerVector& n, const NumericVector& p, double delta, const List& neighbor_list, const List& G_list);
 RcppExport SEXP _nicknamer_sampleZ_cpp(SEXP nSEXP, SEXP pSEXP, SEXP deltaSEXP, SEXP neighbor_listSEXP, SEXP G_listSEXP) {
@@ -27,6 +41,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_nicknamer_pack_name_posterior_cpp", (DL_FUNC) &_nicknamer_pack_name_posterior_cpp, 4},
     {"_nicknamer_sampleZ_cpp", (DL_FUNC) &_nicknamer_sampleZ_cpp, 5},
     {NULL, NULL, 0}
 };

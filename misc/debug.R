@@ -13,7 +13,6 @@ nb = readRDS("~/Downloads/us_names_nb.rds")
 
 post = readRDS("~/Downloads/post_names_1.rds")
 
-surnames[, p := post$p_avg]
-surnames[, post := post$x_avg]
+us_dictionary =  make_bayes_choice_dictionary(all_surnames, surnames, nb, 1, post, 6)
 
-surnames$post
+

@@ -3,6 +3,8 @@
 export(clean_surnames)
 export(draw_gibbs)
 export(find_neighbors)
+export(make_bayes_choice_dictionary)
+export(standardize_names)
 export(synthetic_name_counts)
 import(Rcpp)
 importFrom(Matrix,diag)
