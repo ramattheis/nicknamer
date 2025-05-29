@@ -114,7 +114,7 @@ draw_gibbs <- function(data,
     # Store
     save_idx <- save_idx + 1
     delta_samples[save_idx] <- delta
-    if( iter > n_iter/2 ){ # Baking in a 1/2 time burn-in for posterior means
+    if( iter > min(n_iter/2, 1e4)){ # Baking in a 1/2 time burn-in for posterior means
       iter_sum <- iter_sum + 1
       x_sum <- x_sum + x
       p_sum <- p_sum + p
