@@ -65,7 +65,7 @@ find_neighbors <- function(
 
   # 2) Define the worker: computes distances for one string
   worker <- function(i) {
-    dists <- stringdist::stringdist(strings[i], strings, method = method)
+    dists <- stringdist::stringdist(strings[i], strings, method = method, p = 0.2)
     sel   <- which(dists <= max_dist & seq_len(K) != i)
     list(j = sel, d = dists[sel])
   }

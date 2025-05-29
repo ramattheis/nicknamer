@@ -11,8 +11,8 @@ colnames(surnames) = c("string","count")
 
 nb = readRDS("~/Downloads/us_names_nb.rds")
 
-post = readRDS("~/Downloads/post_names_1.rds")
+post = readRDS("~/Downloads/post_names_all.rds")
 
-us_dictionary =  make_bayes_choice_dictionary(all_surnames, surnames, nb, 1, post, 6)
+us_dictionary =  make_bayes_choice_dictionary(surnames, nb, lambda = 1e-4, post, 6)
 
 

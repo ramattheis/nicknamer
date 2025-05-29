@@ -3,13 +3,21 @@
 %   R/standardize_us_surnames.R
 \name{standardize_names}
 \alias{standardize_names}
-\title{Return Bayes' choices for standard names}
+\title{Return Bayes choices for standard names}
 \usage{
 standardize_names(data, neighbor_list, lambda, post, ncores = 1)
 
 standardize_names(data, neighbor_list, lambda, post, ncores = 1)
 }
 \arguments{
+\item{lambda}{Should match the \code{data} argument in \code{draw_gibbs()}.
+Numeric; fixed scale parameter for error kernel (default 1)}
+
+\item{post}{The output of \code{draw_gibbs()}, a list with three elementS:
+- \code{delta_samples} the chain of draws for \eqn{\delta}
+- \code{x_avg} the posterior mean for the probability of inclusion.
+- \code{p_avg} the posterior mean frequency in the sample.}
+
 \item{ncores}{Integer ≥ 1; number of parallel worker processes to launch.
 Defaults to 1.}
 
@@ -37,7 +45,10 @@ A data.frame with two columns:
 }
 }
 \description{
-#' @description
+takes a vector of raw name strings and returns standardized names.
+Relies on the output of \code{draw_gibbs()} and \code{make_bayes_choice_dictionary}.
+Bayes' choice for a name \eqn{s_i} is \eqn{s_j} to maximize \eqn{Pr(\text{true surname} = s_j | \text{observed} = s_i, \lambda, \delta, s_j \in C)}
+where \eqn{C} collects names included more than 99\% of the time as true names in posterior draws.
 
 #' @description
 }

@@ -2,20 +2,11 @@
 % Please edit documentation in R/make_bayes_choice_dictionary.R
 \name{make_bayes_choice_dictionary}
 \alias{make_bayes_choice_dictionary}
-\title{Build a dictionary of Bayes' choices for standard choices from posterior draws}
+\title{Build a dictionary of Bayes choices for standard choices from posterior draws}
 \usage{
-make_bayes_choice_dictionary(
-  all_names,
-  data,
-  neighbor_list,
-  lambda,
-  post,
-  ncores = 1
-)
+make_bayes_choice_dictionary(data, neighbor_list, lambda, post, ncores = 1)
 }
 \arguments{
-\item{all_names}{Character vector with the full set of unique names.}
-
 \item{data}{Should match the \code{data} argument in \code{draw_gibbs()}.
 Data frame with columns:
 - string: unique identifiers
@@ -41,11 +32,10 @@ Defaults to 1.}
 A data.frame with two columns:
 \itemize{
 \item \code{observed}: string vector of observed names.
-\item \code{standard}: string vector of standardized names.
+\item \code{standard}: string vector of standardized names (\code{NA} if name is ambiguous).
 }
 }
 \description{
-#' @description
 \code{make_bayes_choice_dictionary()} takes the input and output of \code{draw_gibbs()}
 and returns a df with classified names. Bayes' choice for a name \eqn{s_i} is
 \eqn{s_j} to maximize \eqn{Pr(\text{true surname} = s_j | \text{observed} = s_i, \lambda, \delta, s_j \in C)}
