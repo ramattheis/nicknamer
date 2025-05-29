@@ -7,37 +7,35 @@
 make_bayes_choice_dictionary(data, neighbor_list, lambda, post, ncores = 1)
 }
 \arguments{
-\item{data}{Should match the \code{data} argument in \code{draw_gibbs()}.
+\item{data}{Should match the `data` argument in `draw_gibbs()`.
 Data frame with columns:
-- string: unique identifiers
-- count: integer counts}
+        - string: unique identifiers
+        - count: integer counts}
 
-\item{neighbor_list}{Should match the \code{data} argument in \code{draw_gibbs()}.
+\item{neighbor_list}{Should match the `data` argument in `draw_gibbs()`.
 List of length K with elements:
-$j: integer vector of neighbor indices
-$d: numeric vector of edit distances}
+       $j: integer vector of neighbor indices
+       $d: numeric vector of edit distances}
 
-\item{lambda}{Should match the \code{data} argument in \code{draw_gibbs()}.
+\item{lambda}{Should match the `data` argument in `draw_gibbs()`.
 Numeric; fixed scale parameter for error kernel (default 1)}
 
-\item{post}{The output of \code{draw_gibbs()}, a list with three elementS:
-- \code{delta_samples} the chain of draws for \eqn{\delta}
-- \code{x_avg} the posterior mean for the probability of inclusion.
-- \code{p_avg} the posterior mean frequency in the sample.}
+\item{post}{The output of `draw_gibbs()`, a list with three elementS:
+- `delta_samples` the chain of draws for \eqn{\delta}
+- `x_avg` the posterior mean for the probability of inclusion.
+- `p_avg` the posterior mean frequency in the sample.}
 
 \item{ncores}{Integer ≥ 1; number of parallel worker processes to launch.
 Defaults to 1.}
 }
 \value{
 A data.frame with two columns:
-\itemize{
-\item \code{observed}: string vector of observed names.
-\item \code{standard}: string vector of standardized names (\code{NA} if name is ambiguous).
-}
+  - `observed`: string vector of observed names.
+  - `standard`: string vector of standardized names (`NA` if name is ambiguous).
 }
 \description{
-\code{make_bayes_choice_dictionary()} takes the input and output of \code{draw_gibbs()}
+`make_bayes_choice_dictionary()` takes the input and output of `draw_gibbs()`
 and returns a df with classified names. Bayes' choice for a name \eqn{s_i} is
 \eqn{s_j} to maximize \eqn{Pr(\text{true surname} = s_j | \text{observed} = s_i, \lambda, \delta, s_j \in C)}
-where \eqn{C} collects names included more than 99\% of the time as true names in posterior draws.
+where \eqn{C} collects names included more than 99% of the time as true names in posterior draws.
 }

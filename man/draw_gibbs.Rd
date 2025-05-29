@@ -32,11 +32,9 @@ $d: numeric vector of edit distances}
 }
 \value{
 A list with:
-\itemize{
-\item \code{delta_samples}: numeric vector of sampled error rates post-burnin
-\item \code{x_avg}: posterior mean of inclusion indicator \code{x}
-\item \code{p_avg}: posterior mean of mixture weights \code{p}
-}
+  - `delta_samples`: numeric vector of sampled error rates post-burnin
+  - `x_avg`: posterior mean of inclusion indicator `x`
+  - `p_avg`: posterior mean of mixture weights `p`
 }
 \description{
 Run Gibbs sampler for string mixture model (fixed λ)

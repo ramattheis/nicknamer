@@ -2,7 +2,7 @@
 % Please edit documentation in R/find_neighbors.R
 \name{find_neighbors}
 \alias{find_neighbors}
-\title{Build neighbor list for \code{draw_gibbs()} in parallel}
+\title{Build neighbor list for `draw_gibbs()` in parallel}
 \usage{
 find_neighbors(
   strings,
@@ -12,16 +12,16 @@ find_neighbors(
 )
 }
 \arguments{
-\item{strings}{A non‐empty character vector of \strong{unique} strings to compare.
+\item{strings}{A non‐empty character vector of **unique** strings to compare.
 Duplicates will trigger an error.}
 
 \item{method}{Character scalar; distance metric passed to
-\code{stringdist::stringdist()}.  Common choices:
-- \code{"lv"}: Levenshtein edit distance
-- \code{"jw"}: Jaro–Winkler distance (1 − similarity)
-- \code{"cosine"}, \code{"jaccard"}, etc.}
+`stringdist::stringdist()`.  Common choices:
+- `"lv"`: Levenshtein edit distance
+- `"jw"`: Jaro–Winkler distance (1 − similarity)
+- `"cosine"`, `"jaccard"`, etc.}
 
-\item{max_dist}{Numeric ≥ 0; only those pairs whose distance ≤ \code{max_dist}
+\item{max_dist}{Numeric ≥ 0; only those pairs whose distance ≤ `max_dist`
 are returned as neighbors.  Defaults to 3 for edit
 distances and 0.3 for similarity‐based metrics.}
 
@@ -29,34 +29,30 @@ distances and 0.3 for similarity‐based metrics.}
 Defaults to 1.}
 }
 \value{
-A \strong{named} list of length \code{length(strings)}.  Each element is a
-two‐element list containing:
-\itemize{
-\item \code{j}: integer vector of 1-based positions in \code{strings} that are
-within \code{max_dist} of the query string,
-\item \code{d}: numeric vector of the corresponding distances.
-}
+A **named** list of length `length(strings)`.  Each element is a
+  two‐element list containing:
+  - `j`: integer vector of 1-based positions in `strings` that are
+          within `max_dist` of the query string,
+  - `d`: numeric vector of the corresponding distances.
 }
 \description{
-\code{find_neighbors()} identifies, for each string in \code{strings}, all other
-strings within a specified \code{max_dist} under the chosen \code{method} (e.g. edit
-distance \code{"lv"} or Jaro–Winkler \code{"jw"}).  It dispatches the work across
+`find_neighbors()` identifies, for each string in `strings`, all other
+strings within a specified `max_dist` under the chosen `method` (e.g. edit
+distance `"lv"` or Jaro–Winkler `"jw"`).  It dispatches the work across
 multiple cores, showing progress as each chunk completes.
 }
 \details{
-Internally, \code{find_neighbors()} proceeds as follows:
-\enumerate{
-\item \strong{Input validation} — ensures \code{strings} is non‐empty, character, and
-contains no duplicates.
-\item \strong{Worker function} — for a single index \code{i}, computes
-\code{stringdist(strings[i], strings, method = method)}, filters
-those ≤ \code{max_dist}, and returns \code{j} (indices) and \code{d} (distances).
-\item \strong{Cluster setup} — starts a PSOCK cluster with \code{ncores} workers.
-\item \strong{Parallel mapping} — uses \code{pbapply::pblapply()} to apply the worker
-across all \verb{i ∈ 1:K}, showing a progress bar as chunks finish.
-\item \strong{Cleanup & naming} — stops the cluster on exit, assigns the original
-strings as names of the output list, and returns.
-}
+Internally, `find_neighbors()` proceeds as follows:
+1. **Input validation** — ensures `strings` is non‐empty, character, and
+   contains no duplicates.
+2. **Worker function** — for a single index `i`, computes
+   `stringdist(strings[i], strings, method = method)`, filters
+   those ≤ `max_dist`, and returns `j` (indices) and `d` (distances).
+3. **Cluster setup** — starts a PSOCK cluster with `ncores` workers.
+4. **Parallel mapping** — uses `pbapply::pblapply()` to apply the worker
+   across all `i ∈ 1:K`, showing a progress bar as chunks finish.
+5. **Cleanup & naming** — stops the cluster on exit, assigns the original
+   strings as names of the output list, and returns.
 }
 \examples{
 s <- c("apple","apply","appla","banana","banane")

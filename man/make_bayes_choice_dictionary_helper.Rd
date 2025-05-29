@@ -2,7 +2,7 @@
 % Please edit documentation in R/make_bayes_choice_dictionary_helper.R
 \name{make_bayes_choice_dictionary_helper}
 \alias{make_bayes_choice_dictionary_helper}
-\title{Helper function for \code{make_bayes_choice_dictionary()}}
+\title{Helper function for `make_bayes_choice_dictionary()`}
 \usage{
 make_bayes_choice_dictionary_helper(pack)
 }
@@ -10,8 +10,8 @@ make_bayes_choice_dictionary_helper(pack)
 \item{pack}{List of elements prepared by}
 }
 \value{
-A one-row data.frame with the \code{observed} name and id of the \code{standard} name.
+A one-row data.frame with the `observed` name and id of the `standard` name.
 }
 \description{
-Helper function for \code{make_bayes_choice_dictionary()}
+Helper function for `make_bayes_choice_dictionary()`
 }

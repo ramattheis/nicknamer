@@ -22,7 +22,7 @@
 #' @importFrom pbapply pblapply
 #' @importFrom stringdist stringdist
 #' @export
-standardize_names <- function(
+standardize_us_surnames <- function(
     data,
     neighbor_list,
     lambda,

@@ -8,14 +8,12 @@ synthetic_name_counts()
 }
 \value{
 A data frame with two columns:
-\itemize{
-\item \code{name}: character, the (possibly garbled) name
-\item \code{count}: integer, the number of times it appears
-}
+  - `name`: character, the (possibly garbled) name
+  - `count`: integer, the number of times it appears
 }
 \description{
 This function builds a synthetic name‐count dataset by starting from the
-built-in \code{state.name} vector, replicating each name, applying random
+built-in `state.name` vector, replicating each name, applying random
 character substitutions (“garbling”), and then counting the frequencies of
 both clean and garbled names.
 }

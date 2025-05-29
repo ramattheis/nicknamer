@@ -12,8 +12,8 @@
 #'   \item Convert all strings to lowercase.
 #'   \item Remove common suffixes “jr” and “sr”.
 #'   \item Strip spaces and apostrophes.
-#'   \item Standardize “missing‐letter” markers:
 #'   \item Remove all digits.
+#'   \item Standardize “missing‐letter” markers:
 #'   \item Blank out remaining names still containing non-letter/space characters.
 #'   \item Blank out known placeholders: “unreadable”, “unknown”, etc.
 #'   \item Blank out any name of length ≤1.
@@ -35,18 +35,18 @@ clean_surnames <- function(raw_names) {
   # 3) strip spaces/apostrophes
   cleaned <- gsub("[ ']", "", cleaned)
 
-  # 4) standardizing "missing letter" symbols
+  # 4) removing numbers
+  cleaned <- gsub("[0-9]","",cleaned)
+
+  # 5) replacing "missing letter" symbols
   cleaned <- gsub( "(?<=[a-z]{2})[^a-z](?=[a-z])", " ", cleaned, perl = TRUE)
   cleaned <- gsub( "(?<=[a-z])[^a-z](?=[a-z]{2})", " ", cleaned, perl = TRUE)
   cleaned <- gsub( "(?<=[a-z]{3})[^a-z]{2}(?=[a-z])", " ", cleaned, perl = TRUE)
   cleaned <- gsub( "(?<=[a-z])[^a-z]{2}(?=[a-z]{3})", " ", cleaned, perl = TRUE)
   cleaned <- gsub( "(^[^a-z]{1,2}(?=[a-z]{4}))|((?<=[a-z]{4})[^a-z]{1,2}$)", " ", cleaned, perl = TRUE)
 
-  # 5) removing numbers
-  cleaned <- gsub("[0-9]","",cleaned)
-
   # 6) blank out names with any remaining non-letters
-  cleaned[ grepl("[^a-z ]","",cleaned)] = ""
+  cleaned[grepl("[^a-z ]", cleaned)] = ""
 
   # 7) Replacing spaces with ?
   cleaned = gsub(" ","?",cleaned)
