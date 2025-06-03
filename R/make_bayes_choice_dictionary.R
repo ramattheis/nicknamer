@@ -8,7 +8,7 @@
 #'
 #' @param data  Should match the `data` argument in `draw_gibbs()`.
 #'              Data frame with columns:
-#'                      - string: unique identifiers
+#'                      - name: unique identifiers
 #'                      - count: integer counts
 #' @param neighbor_list Should match the `data` argument in `draw_gibbs()`.
 #'               List of length K with elements:
@@ -23,9 +23,12 @@
 #' @param ncores   Integer ≥ 1; number of parallel worker processes to launch.
 #'                 Defaults to 1.
 #'
-#' @return A data.frame with two columns:
-#'   - `observed`: string vector of observed names.
-#'   - `standard`: string vector of standardized names (`NA` if name is ambiguous).
+#' @return A data.frame with five columns:
+#'    $observed: character vector of observed, noisy names
+#'    $standard: character vector of standardized names
+#'    $posterior: numeric vector of posterior probabilities
+#'    $bayes_choice: integer indicating the posterior mode
+#'    $p_standard: numeric vector containing frequency of the standard name
 #'
 #' @importFrom parallel makeCluster stopCluster
 #' @importFrom pbapply pblapply
@@ -40,7 +43,7 @@ make_bayes_choice_dictionary <- function(
 
   # Re-packing data into a list of length K
   packed = pack_name_posterior_cpp(
-    data$string,
+    data$name,
     neighbor_list,
     post$x_avg,
     post$p_avg
@@ -68,10 +71,11 @@ make_bayes_choice_dictionary <- function(
   parallel::stopCluster(cl)
 
   # Returning standardized names
-  bayes_choices$standard = data$string[as.numeric(bayes_choices$candidate_id)]
-  bayes_choices$candidate_id = NULL
-  bayes_choices = bayes_choices[, c(1,4,2,3)]
-  colnames(bayes_choices) = c("observed","standard","posterior","bayes_choice")
+  bayes_choices$standard <- data$name[as.numeric(bayes_choices$candidate_id)]
+  bayes_choices$candidate_id <- NULL
+  bayes_choices <- bayes_choices[, c(1,5,3,4,2)]
+  bayes_choices$p_standard <- with(bayes_choices, ave( p_observed * (bayes_choice == 1), standard, FUN = sum ))
+  bayes_choices$p_observed <- NULL
 
   return(bayes_choices)
 }

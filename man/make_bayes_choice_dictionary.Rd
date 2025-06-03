@@ -9,7 +9,7 @@ make_bayes_choice_dictionary(data, neighbor_list, lambda, post, ncores = 1)
 \arguments{
 \item{data}{Should match the `data` argument in `draw_gibbs()`.
 Data frame with columns:
-        - string: unique identifiers
+        - name: unique identifiers
         - count: integer counts}
 
 \item{neighbor_list}{Should match the `data` argument in `draw_gibbs()`.
@@ -29,9 +29,12 @@ Numeric; fixed scale parameter for error kernel (default 1)}
 Defaults to 1.}
 }
 \value{
-A data.frame with two columns:
-  - `observed`: string vector of observed names.
-  - `standard`: string vector of standardized names (`NA` if name is ambiguous).
+A data.frame with five columns:
+   $observed: character vector of observed, noisy names
+   $standard: character vector of standardized names
+   $posterior: numeric vector of posterior probabilities
+   $bayes_choice: integer indicating the posterior mode
+   $p_standard: numeric vector containing frequency of the standard name
 }
 \description{
 `make_bayes_choice_dictionary()` takes the input and output of `draw_gibbs()`

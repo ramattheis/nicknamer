@@ -4,7 +4,14 @@
 \alias{standardize_names}
 \title{Return Bayes choices for standard names}
 \usage{
-standardize_names(names, dictionary, lambda = 1, post, ncores = 1)
+standardize_names(
+  names,
+  dictionary,
+  method = "jw",
+  lambda = 0.01,
+  delta = 0.01,
+  ncores = 1
+)
 }
 \arguments{
 \item{names}{A vector of character strings to standardize. It's assumed that
@@ -13,17 +20,23 @@ input to `make_bayes_choice_dictionary()`, e.g. using
 `clean_surnames()` for English-language surnames.}
 
 \item{dictionary}{The output of `make_bayes_choice_dictionary()`.
-data.frame with two columns:
+data.frame with five columns:
        $observed: character vector of observed, noisy names
-       $standard: character vector of standardized names}
+       $standard: character vector of standardized names
+       $posterior: numeric vector of posterior probabilities
+       $bayes_choice: integer indicating the posterior mode
+       $p_standard: numeric vector containing frequency of the standard name}
 
-\item{lambda}{Should match the `data` argument in `draw_gibbs()`.
-Numeric; fixed scale parameter for error kernel (default 1)}
+\item{method}{method   Character scalar; distance metric passed to
+`stringdist::stringdist()`.  Common choices: `"jw"`, `"lv"`
+should match the method used in the original dictionary.
+Default is "jw".}
 
-\item{post}{The output of `draw_gibbs()`, a list with three elementS:
-- `delta_samples` the chain of draws for \eqn{\delta}
-- `x_avg` the posterior mean for the probability of inclusion.
-- `p_avg` the posterior mean frequency in the sample.}
+\item{lambda}{Should match the `lambda` argument in `draw_gibbs()`.
+Numeric; fixed scale parameter for error kernel (default 0.01)}
+
+\item{delta}{Postive number equal to the posterior mean; i.e.`mean(post$delta_samples)`
+from the output of `draw_gibbs()`, defaults to 0.01.}
 
 \item{ncores}{Integer ≥ 1; number of parallel worker processes to launch.
 Defaults to 1.}
@@ -34,7 +47,7 @@ A data.frame with two columns:
   - `standard`: string vector of standardized names.
 }
 \description{
-takes a vector of raw name strings and returns standardized names.
+takes a vector of cleaned name strings and returns standardized names.
 Relies on the output of `draw_gibbs()` and `make_bayes_choice_dictionary`.
 Bayes' choice for a name \eqn{s_i} is \eqn{s_j} to maximize \eqn{Pr(\text{true surname} = s_j | \text{observed} = s_i, \lambda, \delta, s_j \in C)}
 where \eqn{C} collects names included more than 99% of the time as true names in posterior draws.

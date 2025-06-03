@@ -1,12 +1,12 @@
-#' Run Gibbs sampler for string mixture model (fixed λ)
+#' Run Gibbs sampler for name mixture model (fixed λ)
 #'
 #' @param data          Data frame with columns:
-#'                      - string: unique identifiers
+#'                      - name: unique identifiers
 #'                      - count: integer counts
 #' @param neighbor_list List of length K with elements:
 #'                      $j: integer vector of neighbor indices
 #'                      $d: numeric vector of edit distances
-#' @param lambda        Numeric; fixed scale parameter for error kernel (default 1)
+#' @param lambda        Numeric; fixed scale parameter for error kernel (default 0.01)
 #' @param priors        Optional named list of priors.
 #' @param init          Optional named list of initial values (excludes λ).
 #' @param n_iter        Total MCMC iterations (default 10000)
@@ -22,12 +22,12 @@
 #' @export
 #' @examples
 #' # Assuming sampleZ_cpp is compiled and available
-#' df <- data.frame(string = c("a","b","c"), count = c(10,5,1))
+#' df <- data.frame(name = c("a","b","c"), count = c(10,5,1))
 #' nbrs <- list(list(j=c(2),d=c(1)), list(j=c(1,3),d=c(1,2)), list(j=2,d=2))
 #' out <- draw_gibbs(df, nbrs, lambda=1, n_iter=100, burnin=10)
 draw_gibbs <- function(data,
                        neighbor_list,
-                       lambda        = 1,
+                       lambda        = 1e-2,
                        priors        = list(),
                        init          = list(),
                        n_iter        = 10000) {

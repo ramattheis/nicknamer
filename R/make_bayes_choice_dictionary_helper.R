@@ -43,6 +43,7 @@ make_bayes_choice_dictionary_helper = function(pack){
 
   out <- data.frame(
     observed     = observed,
+    p_observed = p,
     candidate_id = all_ids[keep],
     posterior    = all_phis[keep],
     bayes_choice = bc[keep]
