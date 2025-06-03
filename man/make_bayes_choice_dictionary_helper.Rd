@@ -10,7 +10,9 @@ make_bayes_choice_dictionary_helper(pack)
 \item{pack}{List of elements prepared by}
 }
 \value{
-A one-row data.frame with the `observed` name and id of the `standard` name.
+A data.frame with the `observed` name, id of the `standard` name,
+       `posterior` probability of the classification, and `bayes_choice`
+       indicator of the posterior mode.
 }
 \description{
 Helper function for `make_bayes_choice_dictionary()`

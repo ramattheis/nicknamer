@@ -36,6 +36,6 @@ A data.frame with two columns:
 \description{
 `make_bayes_choice_dictionary()` takes the input and output of `draw_gibbs()`
 and returns a df with classified names. Bayes' choice for a name \eqn{s_i} is
-\eqn{s_j} to maximize \eqn{Pr(\text{true surname} = s_j | \text{observed} = s_i, \lambda, \delta, s_j \in C)}
+\eqn{s_j} to maximize \eqn{Pr(\text{true name} = s_j | \text{observed} = s_i, \lambda, \delta, s_j \in C)}
 where \eqn{C} collects names included more than 99% of the time as true names in posterior draws.
 }

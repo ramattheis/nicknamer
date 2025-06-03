@@ -3,7 +3,7 @@
 #' @description
 #' `make_bayes_choice_dictionary()` takes the input and output of `draw_gibbs()`
 #' and returns a df with classified names. Bayes' choice for a name \eqn{s_i} is
-#' \eqn{s_j} to maximize \eqn{Pr(\text{true surname} = s_j | \text{observed} = s_i, \lambda, \delta, s_j \in C)}
+#' \eqn{s_j} to maximize \eqn{Pr(\text{true name} = s_j | \text{observed} = s_i, \lambda, \delta, s_j \in C)}
 #' where \eqn{C} collects names included more than 99% of the time as true names in posterior draws.
 #'
 #' @param data  Should match the `data` argument in `draw_gibbs()`.
@@ -64,13 +64,14 @@ make_bayes_choice_dictionary <- function(
   )
   bayes_choices = do.call(rbind,bayes_choices)
 
-  # 7) clean up
+  # clean up
   parallel::stopCluster(cl)
 
-  # Returning surnames
-  bayes_choices$bayes_choice = data$string[as.numeric(bayes_choices$bayes_choice_id)]
-  bayes_choices$bayes_choice_id = NULL
-  colnames(bayes_choices) = c("observed","standard")
+  # Returning standardized names
+  bayes_choices$standard = data$string[as.numeric(bayes_choices$candidate_id)]
+  bayes_choices$candidate_id = NULL
+  bayes_choices = bayes_choices[, c(1,4,2,3)]
+  colnames(bayes_choices) = c("observed","standard","posterior","bayes_choice")
 
   return(bayes_choices)
 }
