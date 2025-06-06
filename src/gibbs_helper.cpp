@@ -1,8 +1,10 @@
 #include <RcppArmadillo.h>
 #include <vector>
 using namespace Rcpp;
+using namespace arma;
 
 // [[Rcpp::depends(RcppArmadillo)]]
+// [[Rcpp::plugins(cpp11)]]
 // [[Rcpp::export]]
 List sampleZ_cpp(const IntegerVector& n,
                  const NumericVector& p,
