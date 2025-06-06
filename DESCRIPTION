@@ -8,7 +8,7 @@ License: `use_mit_license()`
 Encoding: UTF-8
 Roxygen: list(markdown = FALSE)
 RoxygenNote: 7.3.2
-LinkingTo: Rcpp
+LinkingTo: Rcpp, RcppArmadillo
 Imports: Rcpp (>= 1.0), Matrix, stats
 NeedsCompilation: yes
 Packaged: 2025-05-29 22:16:40 UTC; ross
