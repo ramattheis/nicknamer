@@ -1,4 +1,10 @@
 #include <RcppArmadillo.h>
+// [[Rcpp::export]]
+size_t armaIndexSize() {
+  return sizeof(arma::uword);
+}
+
+#include <RcppArmadillo.h>
 #include <vector>
 using namespace Rcpp;
 using namespace arma;

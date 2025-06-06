@@ -11,6 +11,16 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
+// armaIndexSize
+size_t armaIndexSize();
+RcppExport SEXP _nicknamer_armaIndexSize() {
+BEGIN_RCPP
+    Rcpp::RObject rcpp_result_gen;
+    Rcpp::RNGScope rcpp_rngScope_gen;
+    rcpp_result_gen = Rcpp::wrap(armaIndexSize());
+    return rcpp_result_gen;
+END_RCPP
+}
 // sampleZ_cpp
 List sampleZ_cpp(const IntegerVector& n, const NumericVector& p, const double delta, const double lambda, const List& neighbor);
 RcppExport SEXP _nicknamer_sampleZ_cpp(SEXP nSEXP, SEXP pSEXP, SEXP deltaSEXP, SEXP lambdaSEXP, SEXP neighborSEXP) {
@@ -55,6 +65,7 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
+    {"_nicknamer_armaIndexSize", (DL_FUNC) &_nicknamer_armaIndexSize, 0},
     {"_nicknamer_sampleZ_cpp", (DL_FUNC) &_nicknamer_sampleZ_cpp, 5},
     {"_nicknamer_compute_loglik_cpp", (DL_FUNC) &_nicknamer_compute_loglik_cpp, 3},
     {"_nicknamer_pack_name_posterior_cpp", (DL_FUNC) &_nicknamer_pack_name_posterior_cpp, 4},

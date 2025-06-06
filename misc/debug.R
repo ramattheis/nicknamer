@@ -12,6 +12,8 @@ colnames(surnames) = c("name","count")
 
 nb = readRDS("~/Downloads/us_names_nb.rds")
 
+post = draw_gibbs(surnames, nb, n_iter = 10)
+
 post = readRDS("~/Downloads/post_names_all.rds")
 
 us_dictionary = make_bayes_choice_dictionary(surnames, nb, lambda = 1e-3, post, 6)
