@@ -12,7 +12,18 @@ colnames(surnames) = c("name","count")
 
 nb = readRDS("~/Downloads/us_names_nb.rds")
 
-post = draw_gibbs(surnames, nb, n_iter = 10)
+# Debugging (temp)
+data = surnames
+neighbor_list = nb
+lambda = 0.1
+n_iter = 10
+Rcpp::sourceCpp("src/gibbs_helper_temp.cpp")
+library(Matrix)
+priors = list()
+init = list()
+init = 1
+
+post = draw_gibbs(surnames, nb, n_iter = 100)
 
 post = readRDS("~/Downloads/post_names_all.rds")
 

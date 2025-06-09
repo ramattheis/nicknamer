@@ -34,8 +34,10 @@ draw_gibbs <- function(data,
                        priors  = list(),
                        init    = list(),
                        n_iter  = 2e4) {
-  if(!is.numeric(lambda) || lambda <= 0)
+  if(!is.numeric(lambda) || lambda <= 0){
     stop("`lambda` must be positive.")
+  }
+
 
   n <- data$count
   K <- nrow(data)
@@ -44,7 +46,7 @@ draw_gibbs <- function(data,
   prior_def <- list(presence_alpha  = 1,
                     presence_beta   = 99,
                     dirichlet_alpha = 1,
-                    spike_epsilon   = 1e-8,
+                    spike_epsilon   = 0.1,
                     error_alpha     = 1,
                     error_beta      = 9)
   priors <- modifyList(prior_def, priors)
@@ -102,6 +104,10 @@ draw_gibbs <- function(data,
       logA <- (loglik_prop + logprior_prop) -
         (loglik_curr + logprior_curr) +
         log(lambda_prop / lambda)
+
+      cat(paste0("lambda = ", round(lambda,3), " lambda prop. = ", round(lambda_prop,3),
+                 " delta = ", round(delta,3), " log proposal odds = ", round(logA,0), "\n"))
+
       if(log(runif(1)) < logA)
         lambda <- lambda_prop
     }
