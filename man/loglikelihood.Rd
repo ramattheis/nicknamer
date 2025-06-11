@@ -2,34 +2,27 @@
 % Please edit documentation in R/loglikelihood.R
 \name{loglikelihood}
 \alias{loglikelihood}
-\title{Compute log‐likelihood via matrix mulitplication}
+\title{Compute the log-likelihood of observed counts under the garbling model}
 \usage{
 loglikelihood(p, D, M, delta, lambda, n_obs)
 }
 \arguments{
-\item{p}{Numeric vector of “true‐name” probabilities (length K).}
+\item{p}{Numeric vector of length K; true-name mixture weights.}
 
-\item{D}{K×K distance matrix (sparse or dense), with d_{ij} > 0 only
-for neighbor pairs (zeros elsewhere).}
+\item{D}{Distance matrix (or sparseMatrix) K×K.}
 
-\item{M}{K×K mask matrix (sparse or dense) with 1’s for neighbor edges
-and 0’s elsewhere. Must be symmetric.}
+\item{M}{Binary mask matrix (or sparseMatrix) K×K.}
 
-\item{delta}{Garbling probability in [0,1].}
+\item{delta}{Numeric in [0,1]; garbling probability.}
 
-\item{lambda}{Non‐negative rate for exponential‐decay weights.}
+\item{lambda}{Numeric >0; decay rate for off-diagonals.}
 
-\item{n_obs}{Integer or numeric counts vector (length K).}
+\item{n_obs}{Integer vector of length K; counts of observed labels.}
 }
 \value{
-The scalar log‐likelihood
-  \(\sum_{i=1}^K n_i \log L_i\)
-  where
-  \(\mathbf L = (1-\delta)\,\mathbf p + \delta\,( \mathbf p\,E)\),
-  \(E = \mathrm{diag}(1/Z)\,W\),
-  \(W = M\circ e^{-\lambda D}\),
-  \(Z = W\,\mathbf1\).
+Single numeric: log-likelihood \(\sum_i n_{\rm obs,i}\log L_i\).
+        Returns \(-\infty\) if any \(L_i\le0\)
 }
 \description{
-Compute log‐likelihood via matrix mulitplication
+Compute the log-likelihood of observed counts under the garbling model
 }
