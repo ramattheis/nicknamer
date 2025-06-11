@@ -11,44 +11,6 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// armaIndexSize
-size_t armaIndexSize();
-RcppExport SEXP _nicknamer_armaIndexSize() {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    rcpp_result_gen = Rcpp::wrap(armaIndexSize());
-    return rcpp_result_gen;
-END_RCPP
-}
-// sampleZ_cpp
-List sampleZ_cpp(const IntegerVector& n, const NumericVector& p, const double delta, const double lambda, const List& neighbor);
-RcppExport SEXP _nicknamer_sampleZ_cpp(SEXP nSEXP, SEXP pSEXP, SEXP deltaSEXP, SEXP lambdaSEXP, SEXP neighborSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const IntegerVector& >::type n(nSEXP);
-    Rcpp::traits::input_parameter< const NumericVector& >::type p(pSEXP);
-    Rcpp::traits::input_parameter< const double >::type delta(deltaSEXP);
-    Rcpp::traits::input_parameter< const double >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< const List& >::type neighbor(neighborSEXP);
-    rcpp_result_gen = Rcpp::wrap(sampleZ_cpp(n, p, delta, lambda, neighbor));
-    return rcpp_result_gen;
-END_RCPP
-}
-// compute_loglik_cpp
-double compute_loglik_cpp(const S4& Zsp, const double lambda, const List& neighbor);
-RcppExport SEXP _nicknamer_compute_loglik_cpp(SEXP ZspSEXP, SEXP lambdaSEXP, SEXP neighborSEXP) {
-BEGIN_RCPP
-    Rcpp::RObject rcpp_result_gen;
-    Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< const S4& >::type Zsp(ZspSEXP);
-    Rcpp::traits::input_parameter< const double >::type lambda(lambdaSEXP);
-    Rcpp::traits::input_parameter< const List& >::type neighbor(neighborSEXP);
-    rcpp_result_gen = Rcpp::wrap(compute_loglik_cpp(Zsp, lambda, neighbor));
-    return rcpp_result_gen;
-END_RCPP
-}
 // pack_name_posterior_cpp
 List pack_name_posterior_cpp(CharacterVector names, List neighbor_list, NumericVector x_avg, NumericVector p_avg);
 RcppExport SEXP _nicknamer_pack_name_posterior_cpp(SEXP namesSEXP, SEXP neighbor_listSEXP, SEXP x_avgSEXP, SEXP p_avgSEXP) {
@@ -65,9 +27,6 @@ END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_nicknamer_armaIndexSize", (DL_FUNC) &_nicknamer_armaIndexSize, 0},
-    {"_nicknamer_sampleZ_cpp", (DL_FUNC) &_nicknamer_sampleZ_cpp, 5},
-    {"_nicknamer_compute_loglik_cpp", (DL_FUNC) &_nicknamer_compute_loglik_cpp, 3},
     {"_nicknamer_pack_name_posterior_cpp", (DL_FUNC) &_nicknamer_pack_name_posterior_cpp, 4},
     {NULL, NULL, 0}
 };

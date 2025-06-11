@@ -2,63 +2,35 @@
 % Please edit documentation in R/find_neighbors.R
 \name{find_neighbors}
 \alias{find_neighbors}
-\title{Build neighbor list for `draw_gibbs()` in parallel}
+\title{Build sparse distance (D) and neighbor‐mask (M) matrices for names}
 \usage{
 find_neighbors(
-  strings,
+  names,
   method = "jw",
   max_dist = ifelse(method \%in\% c("jw", "cosine", "jaccard"), 0.3, 3),
   ncores = 1
 )
 }
 \arguments{
-\item{strings}{A non‐empty character vector of **unique** strings to compare.
-Duplicates will trigger an error.}
+\item{names}{A non‐empty character vector of **unique** names.}
 
-\item{method}{Character scalar; distance metric passed to
-`stringdist::stringdist()`.  Common choices:
-- `"lv"`: Levenshtein edit distance
-- `"jw"`: Jaro–Winkler distance (1 − similarity)
-- `"cosine"`, `"jaccard"`, etc.}
+\item{method}{Distance metric passed to `stringdist::stringdist()`.
+E.g. `"lv"`, `"jw"`, `"cosine"`, `"jaccard"`.}
 
-\item{max_dist}{Numeric ≥ 0; only those pairs whose distance ≤ `max_dist`
-are returned as neighbors.  Defaults to 3 for edit
-distances and 0.3 for similarity‐based metrics.}
+\item{max_dist}{Numeric ≥ 0; include only pairs with distance ≤ `max_dist`.
+Defaults to 3 for edit distances, 0.3 for similarity‐based.}
 
-\item{ncores}{Integer ≥ 1; number of parallel worker processes to launch.
-Defaults to 1.}
+\item{ncores}{Integer ≥ 1; number of parallel workers.  Defaults to 1.}
 }
 \value{
-A **named** list of length `length(strings)`.  Each element is a
-  two‐element list containing:
-  - `j`: integer vector of 1-based positions in `strings` that are
-          within `max_dist` of the query string,
-  - `d`: numeric vector of the corresponding distances.
+A list with two elements:
+  - `D`: symmetric sparse matrix of distances (`d_{ij}`) for neighbor pairs.
+  - `M`: symmetric sparse 0/1 mask indicating neighbor edges.
 }
 \description{
-`find_neighbors()` identifies, for each string in `strings`, all other
-strings within a specified `max_dist` under the chosen `method` (e.g. edit
-distance `"lv"` or Jaro–Winkler `"jw"`).  It dispatches the work across
-multiple cores, showing progress as each chunk completes.
-}
-\details{
-Internally, `find_neighbors()` proceeds as follows:
-1. **Input validation** — ensures `strings` is non‐empty, character, and
-   contains no duplicates.
-2. **Worker function** — for a single index `i`, computes
-   `stringdist(strings[i], strings, method = method)`, filters
-   those ≤ `max_dist`, and returns `j` (indices) and `d` (distances).
-3. **Cluster setup** — starts a PSOCK cluster with `ncores` workers.
-4. **Parallel mapping** — uses `pbapply::pblapply()` to apply the worker
-   across all `i ∈ 1:K`, showing a progress bar as chunks finish.
-5. **Cleanup & naming** — stops the cluster on exit, assigns the original
-   strings as names of the output list, and returns.
-}
-\examples{
-s <- c("apple","apply","appla","banana","banane")
-# Find all within Levenshtein distance 2, on 2 cores:
-find_neighbors(s, method = "lv", max_dist = 2, ncores = 2)
-# Find all within Jaro–Winkler distance 0.15, on all cores:
-find_neighbors(s, method = "jw", max_dist = 0.15)
-
+`find_neighbors()` computes, for a vector of unique names,
+(1) a sparse matrix `D` of pairwise distances (only for neighbors within
+`max_dist`), and (2) a sparse binary mask `M` indicating which pairs are
+“neighbors.”  It parallelizes the distance computations and packs the
+results into two symmetric `Matrix::sparseMatrix` objects.
 }

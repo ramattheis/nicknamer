@@ -1,85 +1,77 @@
-#' Build neighbor list for `draw_gibbs()` in parallel
+#' Build sparse distance (D) and neighbor‐mask (M) matrices for names
 #'
-#' `find_neighbors()` identifies, for each string in `strings`, all other
-#' strings within a specified `max_dist` under the chosen `method` (e.g. edit
-#' distance `"lv"` or Jaro–Winkler `"jw"`).  It dispatches the work across
-#' multiple cores, showing progress as each chunk completes.
+#' `find_neighbors()` computes, for a vector of unique names,
+#' (1) a sparse matrix `D` of pairwise distances (only for neighbors within
+#' `max_dist`), and (2) a sparse binary mask `M` indicating which pairs are
+#' “neighbors.”  It parallelizes the distance computations and packs the
+#' results into two symmetric `Matrix::sparseMatrix` objects.
 #'
-#' @param strings  A non‐empty character vector of **unique** strings to compare.
-#'                 Duplicates will trigger an error.
-#' @param method   Character scalar; distance metric passed to
-#'                 `stringdist::stringdist()`.  Common choices:
-#'                 - `"lv"`: Levenshtein edit distance
-#'                 - `"jw"`: Jaro–Winkler distance (1 − similarity)
-#'                 - `"cosine"`, `"jaccard"`, etc.
-#' @param max_dist Numeric ≥ 0; only those pairs whose distance ≤ `max_dist`
-#'                 are returned as neighbors.  Defaults to 3 for edit
-#'                 distances and 0.3 for similarity‐based metrics.
-#' @param ncores   Integer ≥ 1; number of parallel worker processes to launch.
-#'                 Defaults to 1.
+#' @param names  A non‐empty character vector of **unique** names.
+#' @param method   Distance metric passed to `stringdist::stringdist()`.
+#'                 E.g. `"lv"`, `"jw"`, `"cosine"`, `"jaccard"`.
+#' @param max_dist Numeric ≥ 0; include only pairs with distance ≤ `max_dist`.
+#'                 Defaults to 3 for edit distances, 0.3 for similarity‐based.
+#' @param ncores   Integer ≥ 1; number of parallel workers.  Defaults to 1.
 #'
-#' @return A **named** list of length `length(strings)`.  Each element is a
-#'   two‐element list containing:
-#'   - `j`: integer vector of 1-based positions in `strings` that are
-#'           within `max_dist` of the query string,
-#'   - `d`: numeric vector of the corresponding distances.
+#' @return A list with two elements:
+#'   - `D`: symmetric sparse matrix of distances (`d_{ij}`) for neighbor pairs.
+#'   - `M`: symmetric sparse 0/1 mask indicating neighbor edges.
 #'
-#' @details
-#' Internally, `find_neighbors()` proceeds as follows:
-#' 1. **Input validation** — ensures `strings` is non‐empty, character, and
-#'    contains no duplicates.
-#' 2. **Worker function** — for a single index `i`, computes
-#'    `stringdist(strings[i], strings, method = method)`, filters
-#'    those ≤ `max_dist`, and returns `j` (indices) and `d` (distances).
-#' 3. **Cluster setup** — starts a PSOCK cluster with `ncores` workers.
-#' 4. **Parallel mapping** — uses `pbapply::pblapply()` to apply the worker
-#'    across all `i ∈ 1:K`, showing a progress bar as chunks finish.
-#' 5. **Cleanup & naming** — stops the cluster on exit, assigns the original
-#'    strings as names of the output list, and returns.
-#'
-#' @examples
-#' s <- c("apple","apply","appla","banana","banane")
-#' # Find all within Levenshtein distance 2, on 2 cores:
-#' find_neighbors(s, method = "lv", max_dist = 2, ncores = 2)
-#' # Find all within Jaro–Winkler distance 0.15, on all cores:
-#' find_neighbors(s, method = "jw", max_dist = 0.15)
-#'
-#' @importFrom parallel detectCores makeCluster stopCluster
+#' @importFrom parallel makeCluster stopCluster
 #' @importFrom pbapply pblapply
 #' @importFrom stringdist stringdist
+#' @importFrom Matrix sparseMatrix
 #' @export
 find_neighbors <- function(
-    strings,
-    method    = "jw",
-    max_dist  = ifelse(method %in% c("jw","cosine","jaccard"), 0.3, 3),
-    ncores    = 1
+    names,
+    method   = "jw",
+    max_dist = ifelse(method %in% c("jw","cosine","jaccard"), 0.3, 3),
+    ncores   = 1
 ) {
-  # 1) Input validation
-  if (!is.character(strings) || length(strings) < 1) {
-    stop("`strings` must be a non‐empty character vector.")
+  # 1) validation
+  if (!is.character(names) || length(names) < 1) {
+    stop("`names` must be a non‐empty character vector.")
   }
-  if (anyDuplicated(strings)) {
-    stop("`strings` must not contain duplicates.")
+  if (anyDuplicated(names)) {
+    stop("`names` must not contain duplicates.")
   }
-  K <- length(strings)
+  K <- length(names)
 
-  # 2) Define the worker: computes distances for one string
+  # 2) worker: compute dists for one string
   worker <- function(i) {
-    dists <- stringdist::stringdist(strings[i], strings, method = method, p = 0.2)
-    sel   <- which(dists <= max_dist & seq_len(K) != i)
-    list(j = sel, d = dists[sel])
+    d <- stringdist::stringdist(names[i], names, method = method)
+    sel <- which(d <= max_dist & seq_len(K) != i)
+    list(i = rep(i, length(sel)),
+         j = sel,
+         d = d[sel])
   }
 
-  # 3) Launch a PSOCK cluster for parallel execution
+  # 3) parallel map with progress bar
   cl <- parallel::makeCluster(ncores)
   on.exit(parallel::stopCluster(cl), add = TRUE)
+  parallel::clusterExport(cl = cl,
+        varlist = c("names","method","max_dist","K"),
+        envir = environment())
+  results <- pbapply::pblapply(seq_len(K), worker, cl = cl)
+  is <- unlist(lapply(results, function(r) r$i))
+  js <- unlist(lapply(results, function(r) r$j))
+  ds <- unlist(lapply(results, function(r) r$d))
 
-  # 4) Map the worker across all indices with a progress bar
-  nb_list <- pbapply::pblapply(seq_len(K), worker, cl = cl)
+  # 4) build sparse matrices
+  D <- Matrix::sparseMatrix(
+    i = is,
+    j = js,
+    x = ds,
+    dims = c(K, K),
+    dimnames = list(names, names)
+  )
+  M <- Matrix::sparseMatrix(
+    i = is,
+    j = js,
+    x = rep(1L, length(is)),
+    dims = c(K, K),
+    dimnames = list(names, names)
+  )
 
-  # 5) Assign names and return
-  names(nb_list) <- strings
-  nb_list
+  list(D = D, M = M)
 }
-
-
