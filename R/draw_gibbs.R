@@ -6,7 +6,6 @@
 #' and jointly updates the distortion probability \code{delta} and decay rate \code{lambda} via a Metropolis-Hastings random walk.
 #' Only the first five entries of \code{p} are retained in the output.
 #'
-#' @param p_init Numeric vector of length K; initial true-name probabilities.
 #' @param D Matrix or sparse matrix; K×K distance matrix with distances for neighbor pairs.
 #' @param M Matrix or sparse matrix; K×K binary mask of neighbor edges (1 for neighbors, 0 otherwise).
 #' @param n_obs Numeric or integer vector of length K; observed counts per name.
@@ -25,13 +24,12 @@
 #'   \item{lambda}{Numeric vector of sampled \code{lambda} values.}
 #'   \item{likelihood}{Numeric vector of log-likelihood values at each iteration.}
 #'   \item{p_first5}{Matrix (\code{n_iter} × \code{min(5,K)}) of the first five entries of \code{p} at each iteration.}
+#'   \item{p_mean} giving the posterior mean of \code{p} after burn-in.
 #' }
 #'
 #' @examples
 #' \dontrun{
-#' K <- length(p_init)
 #' out <- draw_gibbs(
-#'   p_init     = rep(1/K, K),
 #'   D          = D_mat,
 #'   M          = M_mat,
 #'   n_obs      = counts,
@@ -42,7 +40,6 @@
 #'
 #' @export
 draw_gibbs<- function(
-    p_init,
     D, M, n_obs,
     n_iter       = 10000,
     delta_init   = 0.1,
@@ -53,7 +50,7 @@ draw_gibbs<- function(
     prior_delta  = function(d) dbeta(d, 9, 1,  log = TRUE),
     prior_lambda = function(l) dgamma(l, 1, 0.1, log = TRUE)
 ) {
-  K <- length(p_init)
+  K <- length(n_obs)
   if (length(alpha_dir) == 1) alpha_dir <- rep(alpha_dir, K)
 
   # storage for first 5 entries of p only
@@ -61,9 +58,11 @@ draw_gibbs<- function(
   delta_chain  <- numeric(n_iter)
   lambda_chain <- numeric(n_iter)
   ll_chain     <- numeric(n_iter)
+  p_sum        <- numeric(K)
+  count_sum    <- 0L
 
   # initialise state
-  p_curr      <- p_init / sum(p_init)
+  p_curr      <- n_obs / sum(n_obs)
   delta_curr  <- delta_init
   lambda_curr <- lambda_init
 
@@ -73,6 +72,7 @@ draw_gibbs<- function(
   ilogit <- function(x) exp(x) / (1 + exp(x))
 
   for (t in seq_len(n_iter)) {
+
     # (1) collapsed Dirichlet update for p via expected counts
     Kmat      <- make_kernel(D, M, delta_curr, lambda_curr)
     denom     <- as.numeric(Kmat %*% p_curr)
@@ -82,6 +82,12 @@ draw_gibbs<- function(
 
     # store only first 5 entries of p
     p5_chain[t, ] <- p_curr[1:ncol(p5_chain)]
+
+    # recording posterior mean of p
+    if (t > n_iter / 2) {
+      p_sum <- p_sum + p_curr
+      count_sum <- count_sum + 1L
+    }
 
     # (2) joint MH step for (delta, lambda)
     logit_prop <- rnorm(1, logit(delta_curr), sd_logit)
@@ -118,7 +124,8 @@ draw_gibbs<- function(
     delta       = delta_chain,
     lambda      = lambda_chain,
     likelihood  = ll_chain,
-    p_first5    = p5_chain
+    p_first5    = p5_chain,
+    p_mean      = p_sum / count_sum
   )
 }
 

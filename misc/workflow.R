@@ -1,6 +1,5 @@
 library(nicknamer)        # for clean_surnames(), build_neighbor_matrices(), draw_gibbs()
 library(data.table)       # fast I/O and aggregation
-library(Matrix)           # sparse‐matrix support
 
 # 1) Load & clean raw name counts
 dt <- fread("misc/chunk.csv")
@@ -18,37 +17,15 @@ nmats <- find_neighbors(
 D <- nmats$D
 M <- nmats$M
 
-# 3) Fix p exogenously as slightly squished empirical frequencies
-p_vec <- dt_counts$count / sum(dt_counts$count)
-
-# 4) Observed counts vector
-n_obs <- dt_counts$count
-
-library(Matrix)
-p_init      = p_vec
-D           = D
-M           = M
-n_obs       = n_obs
-n_iter      = 2000
-delta_init   = 0.1
-lambda_init  = 1.0
-sd_logit     = 0.1
-sd_loglam    = 0.1
-alpha_dir    = 1
-prior_delta  = function(d) dbeta(d, 9, 1,  log = TRUE)
-prior_lambda = function(l) dgamma(l, 1, 0.1, log = TRUE)
-
-
-# 5) Run the MH-within-Gibbs sampler
+# 3) Run the MH-within-Gibbs sampler
 out <- draw_gibbs(
-  p_init      = p_vec,
   D           = D,
   M           = M,
-  n_obs       = n_obs,
-  n_iter      = 200
+  n_obs       = dt_counts$count,
+  n_iter      = 20
 )
 
-# 6) Quick convergence diagnostics
+# 4) Quick convergence diagnostics
 plot(out$delta,  type = "l", main = "Trace of δ",     ylab = "delta")
 plot(out$lambda, type = "l", main = "Trace of λ", ylab = "lambda")
 plot(out$delta, out$lambda, xlab = "delta", ylab = "lambda", pch = ".")

@@ -5,7 +5,6 @@
 \title{Draw from the posterior of the name garbling model.}
 \usage{
 draw_gibbs(
-  p_init,
   D,
   M,
   n_obs,
@@ -20,8 +19,6 @@ draw_gibbs(
 )
 }
 \arguments{
-\item{p_init}{Numeric vector of length K; initial true-name probabilities.}
-
 \item{D}{Matrix or sparse matrix; K×K distance matrix with distances for neighbor pairs.}
 
 \item{M}{Matrix or sparse matrix; K×K binary mask of neighbor edges (1 for neighbors, 0 otherwise).}
@@ -51,6 +48,7 @@ A list with components:
   \item{lambda}{Numeric vector of sampled \code{lambda} values.}
   \item{likelihood}{Numeric vector of log-likelihood values at each iteration.}
   \item{p_first5}{Matrix (\code{n_iter} × \code{min(5,K)}) of the first five entries of \code{p} at each iteration.}
+  \item{p_mean} giving the posterior mean of \code{p} after burn-in.
 }
 }
 \description{
@@ -61,9 +59,7 @@ Only the first five entries of \code{p} are retained in the output.
 }
 \examples{
 \dontrun{
-K <- length(p_init)
 out <- draw_gibbs(
-  p_init     = rep(1/K, K),
   D          = D_mat,
   M          = M_mat,
   n_obs      = counts,
