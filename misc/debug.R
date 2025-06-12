@@ -7,7 +7,7 @@ surnames = fread("~/Downloads/us_surnames.csv")
 
 # Removing surnames with fewer than 10 obs and no missing chars (~4.4% of individuals omitted)
 all_surnames = surnames$namelast
-surnames = surnames[n>10  & !grepl("\\?",namelast) & namelast != ""]
+surnames = surnames[n>10  & !grepl("\\?",namelast)]
 
 # Renaming columns to match draw_gibbs expectations
 colnames(surnames) = c("name","count")

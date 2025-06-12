@@ -27,6 +27,8 @@
 #'   \item{p_mean} giving the posterior mean of \code{p} after burn-in.
 #' }
 #'
+#' @importFrom Matrix crossprod
+#'
 #' @examples
 #' \dontrun{
 #' out <- draw_gibbs(
@@ -77,7 +79,7 @@ draw_gibbs<- function(
     Kmat      <- make_kernel(D, M, delta_curr, lambda_curr)
     denom     <- as.numeric(Kmat %*% p_curr)
     tmp       <- n_obs / denom
-    exp_counts <- p_curr * as.numeric(crossprod(Kmat, tmp))
+    exp_counts <- p_curr * as.numeric(Matrix::crossprod(Kmat, tmp))
     p_curr     <- rdirichlet(alpha_dir + exp_counts)
 
     # store only first 5 entries of p
