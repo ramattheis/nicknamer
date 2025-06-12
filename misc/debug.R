@@ -2,28 +2,35 @@
 library(data.table)
 library(nicknamer)
 
+# Reloading the tabulation of all (cleaned) surnames in the census
 surnames = fread("~/Downloads/us_surnames.csv")
 
-surnames = surnames[namelast != ""]
+# Removing surnames with fewer than 10 obs and no missing chars (~4.4% of individuals omitted)
 all_surnames = surnames$namelast
-surnames = surnames[n>100]
+surnames = surnames[n>10  & !grepl("\\?",namelast) & namelast != ""]
 
+# Renaming columns to match draw_gibbs expectations
 colnames(surnames) = c("name","count")
 
 nb = readRDS("~/Downloads/us_names_nb.rds")
 
-# Debugging (temp)
-data = surnames
-neighbor_list = nb
-lambda = 0.1
-n_iter = 10
-Rcpp::sourceCpp("src/gibbs_helper_temp.cpp")
-library(Matrix)
-priors = list()
-init = list()
-init = 1
+post = draw_gibbs(n_obs = surnames$count,
+                  D = nb$D,
+                  M = nb$M,
+                  n_iter = 10)
 
-post = draw_gibbs(surnames, nb, n_iter = 100)
+# Debugging (temp)
+n_obs = surnames$count
+D = nb$D
+M = nb$M
+n_iter = 2
+delta_init   = 0.1
+lambda_init  = 1.0
+sd_logit     = 0.1
+sd_loglam    = 0.1
+alpha_dir    = 1
+prior_delta  = function(d) dbeta(d, 9, 1,  log = TRUE)
+prior_lambda = function(l) dgamma(l, 1, 0.1, log = TRUE)
 
 post = readRDS("~/Downloads/post_names_all.rds")
 
