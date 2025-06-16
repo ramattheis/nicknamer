@@ -11,23 +11,24 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// pack_name_posterior_cpp
-List pack_name_posterior_cpp(CharacterVector names, List neighbor_list, NumericVector x_avg, NumericVector p_avg);
-RcppExport SEXP _nicknamer_pack_name_posterior_cpp(SEXP namesSEXP, SEXP neighbor_listSEXP, SEXP x_avgSEXP, SEXP p_avgSEXP) {
+// find_posterior_cpp
+List find_posterior_cpp(const CharacterVector& names, const arma::sp_mat& D, const NumericVector& p, double delta, double lambda);
+RcppExport SEXP _nicknamer_find_posterior_cpp(SEXP namesSEXP, SEXP DSEXP, SEXP pSEXP, SEXP deltaSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
-    Rcpp::traits::input_parameter< CharacterVector >::type names(namesSEXP);
-    Rcpp::traits::input_parameter< List >::type neighbor_list(neighbor_listSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type x_avg(x_avgSEXP);
-    Rcpp::traits::input_parameter< NumericVector >::type p_avg(p_avgSEXP);
-    rcpp_result_gen = Rcpp::wrap(pack_name_posterior_cpp(names, neighbor_list, x_avg, p_avg));
+    Rcpp::traits::input_parameter< const CharacterVector& >::type names(namesSEXP);
+    Rcpp::traits::input_parameter< const arma::sp_mat& >::type D(DSEXP);
+    Rcpp::traits::input_parameter< const NumericVector& >::type p(pSEXP);
+    Rcpp::traits::input_parameter< double >::type delta(deltaSEXP);
+    Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
+    rcpp_result_gen = Rcpp::wrap(find_posterior_cpp(names, D, p, delta, lambda));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_nicknamer_pack_name_posterior_cpp", (DL_FUNC) &_nicknamer_pack_name_posterior_cpp, 4},
+    {"_nicknamer_find_posterior_cpp", (DL_FUNC) &_nicknamer_find_posterior_cpp, 5},
     {NULL, NULL, 0}
 };
 

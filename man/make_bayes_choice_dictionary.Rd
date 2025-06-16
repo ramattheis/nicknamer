@@ -4,7 +4,7 @@
 \alias{make_bayes_choice_dictionary}
 \title{Build a dictionary of Bayes choices for standard choices from posterior draws}
 \usage{
-make_bayes_choice_dictionary(data, neighbor_list, lambda, post, ncores = 1)
+make_bayes_choice_dictionary(data, D, lambda, post, ncores = 1)
 }
 \arguments{
 \item{data}{Should match the `data` argument in `draw_gibbs()`.
@@ -12,18 +12,12 @@ Data frame with columns:
         - name: unique identifiers
         - count: integer counts}
 
-\item{neighbor_list}{Should match the `data` argument in `draw_gibbs()`.
-List of length K with elements:
-       $j: integer vector of neighbor indices
-       $d: numeric vector of edit distances}
+\item{D}{Matrix or sparse matrix matching the argument to `draw_gibbs`; K×K distance matrix with distances for neighbor pairs.}
 
-\item{lambda}{Should match the `data` argument in `draw_gibbs()`.
-Numeric; fixed scale parameter for error kernel (default 1)}
-
-\item{post}{The output of `draw_gibbs()`, a list with three elementS:
-- `delta_samples` the chain of draws for \eqn{\delta}
-- `x_avg` the posterior mean for the probability of inclusion.
-- `p_avg` the posterior mean frequency in the sample.}
+\item{post}{The output of `draw_gibbs()`, a list including three elements used here:
+- `delta` the chain of draws for \eqn{\delta}
+- `lambda` the chain of draws for \eqn{\lambda}
+- `p_mean` the posterior mean for the latent frequency of names in the population.}
 
 \item{ncores}{Integer ≥ 1; number of parallel worker processes to launch.
 Defaults to 1.}
