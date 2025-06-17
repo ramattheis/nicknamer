@@ -11,9 +11,9 @@ Rcpp::Rostream<true>&  Rcpp::Rcout = Rcpp::Rcpp_cout_get();
 Rcpp::Rostream<false>& Rcpp::Rcerr = Rcpp::Rcpp_cerr_get();
 #endif
 
-// find_posterior_cpp
-List find_posterior_cpp(const CharacterVector& names, const arma::sp_mat& D, const NumericVector& p, double delta, double lambda);
-RcppExport SEXP _nicknamer_find_posterior_cpp(SEXP namesSEXP, SEXP DSEXP, SEXP pSEXP, SEXP deltaSEXP, SEXP lambdaSEXP) {
+// make_bayes_choice_dictionary_cpp
+DataFrame make_bayes_choice_dictionary_cpp(const CharacterVector& names, const arma::sp_mat& D, const NumericVector& p, double delta, double lambda);
+RcppExport SEXP _nicknamer_make_bayes_choice_dictionary_cpp(SEXP namesSEXP, SEXP DSEXP, SEXP pSEXP, SEXP deltaSEXP, SEXP lambdaSEXP) {
 BEGIN_RCPP
     Rcpp::RObject rcpp_result_gen;
     Rcpp::RNGScope rcpp_rngScope_gen;
@@ -22,13 +22,13 @@ BEGIN_RCPP
     Rcpp::traits::input_parameter< const NumericVector& >::type p(pSEXP);
     Rcpp::traits::input_parameter< double >::type delta(deltaSEXP);
     Rcpp::traits::input_parameter< double >::type lambda(lambdaSEXP);
-    rcpp_result_gen = Rcpp::wrap(find_posterior_cpp(names, D, p, delta, lambda));
+    rcpp_result_gen = Rcpp::wrap(make_bayes_choice_dictionary_cpp(names, D, p, delta, lambda));
     return rcpp_result_gen;
 END_RCPP
 }
 
 static const R_CallMethodDef CallEntries[] = {
-    {"_nicknamer_find_posterior_cpp", (DL_FUNC) &_nicknamer_find_posterior_cpp, 5},
+    {"_nicknamer_make_bayes_choice_dictionary_cpp", (DL_FUNC) &_nicknamer_make_bayes_choice_dictionary_cpp, 5},
     {NULL, NULL, 0}
 };
 
