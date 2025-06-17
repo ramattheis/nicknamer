@@ -2,21 +2,20 @@
 % Please edit documentation in R/standardize_missing_name.R
 \name{standardize_missing_name}
 \alias{standardize_missing_name}
-\title{Helper function for `standardize_names()`}
+\title{Helper function for `standardize_names()`, one name at a time}
 \usage{
-standardize_missing_name(names_vec)
+standardize_missing_name(name)
 }
 \arguments{
-\item{names_vec}{A character vector of names to standardize.}
+\item{name}{A single character string to standardize.}
 }
 \value{
-A character vector of the same length as `names_vec`, containing
-  the standardized name or `NA` for each entry.
+A single character (the standardized name) or `NA`.
 }
 \description{
-Takes a character vector of “clean” name strings (outside the dictionary) and
-returns the best‐guess standardized names, or `NA` when no candidate passes
-the posterior‐probability cutoff of 0.75. Relies on the output of
+Takes a single “clean” name string (outside the dictionary) and
+returns the best‐guess standardized name, or `NA` when no candidate
+passes the posterior‐probability cutoff of 0.75. Relies on the output of
 `draw_gibbs()` and `make_bayes_choice_dictionary()`, which populate
 `standard_names$standard`, `standard_names$p_standard`, as well as the
 globals `method`, `lambda`, and `delta`.

@@ -74,13 +74,11 @@ standardize_names <- function(
     )
 
     # Making a new dictionary for missing names
-    chunks <- split(missing_observed,ceiling(seq_along(missing_observed) / 100))
-    results_list <- pbapply::pblapply(
-      X   = chunks,
+    missing_standard <- pbapply::pbsapply(
+      X   = missing_observed,
       FUN = standardize_missing_name,
       cl  = cl
     )
-    missing_standard <- unlist(results_list, use.names = FALSE)
 
     # clean up
     parallel::stopCluster(cl)

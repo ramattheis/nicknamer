@@ -27,18 +27,18 @@ us_dictionary = make_bayes_choice_dictionary(
 )
 
 
-#names = all_surnames
+#names = tail(all_surnames,n=400)
 #dictionary = us_dictionary
-#lambda = 100
+#lambda = 1000
 #delta = 0.1
 #method = "jw"
-#ncores = 10
+#ncores = 2
 
 us_names = standardize_names(
-  names = all_surnames,
+  names = tail(all_surnames,n=200),
   dictionary = us_dictionary,
   lambda = 1000,
   delta = 0.1,
   method = "jw",
-  ncores = 10
+  ncores = 2
   )
