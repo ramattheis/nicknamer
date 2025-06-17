@@ -4,14 +4,7 @@
 \alias{standardize_names}
 \title{Return Bayes choices for standard names}
 \usage{
-standardize_names(
-  names,
-  dictionary,
-  method = "jw",
-  lambda = 0.01,
-  delta = 0.01,
-  ncores = 1
-)
+standardize_names(names, dictionary, lambda, delta, method = "jw", ncores = 1)
 }
 \arguments{
 \item{names}{A vector of character strings to standardize. It's assumed that
@@ -20,23 +13,20 @@ input to `make_bayes_choice_dictionary()`, e.g. using
 `clean_surnames()` for English-language surnames.}
 
 \item{dictionary}{The output of `make_bayes_choice_dictionary()`.
-data.frame with five columns:
+data.frame with two columns:
        $observed: character vector of observed, noisy names
        $standard: character vector of standardized names
-       $posterior: numeric vector of posterior probabilities
-       $bayes_choice: integer indicating the posterior mode
-       $p_standard: numeric vector containing frequency of the standard name}
+       $p_standard: positive numeric vector of name frequencies}
+
+\item{lambda}{Postive number equal to the posterior mean; i.e.`mean(post$lambda)`}
+
+\item{delta}{Postive number equal to the posterior mean; i.e.`mean(post$delta)`
+from the output of `draw_gibbs()`.}
 
 \item{method}{method   Character scalar; distance metric passed to
 `stringdist::stringdist()`.  Common choices: `"jw"`, `"lv"`
 should match the method used in the original dictionary.
 Default is "jw".}
-
-\item{lambda}{Should match the `lambda` argument in `draw_gibbs()`.
-Numeric; fixed scale parameter for error kernel (default 0.01)}
-
-\item{delta}{Postive number equal to the posterior mean; i.e.`mean(post$delta_samples)`
-from the output of `draw_gibbs()`, defaults to 0.01.}
 
 \item{ncores}{Integer ≥ 1; number of parallel worker processes to launch.
 Defaults to 1.}

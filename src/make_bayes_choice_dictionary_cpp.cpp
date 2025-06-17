@@ -1,8 +1,6 @@
-// force 64-bit indices
-#define ARMA_64BIT_WORD
-
 // [[Rcpp::depends(RcppArmadillo)]]
 #include <RcppArmadillo.h>
+#include <map>
 using namespace Rcpp;
 
 // [[Rcpp::export]]
@@ -18,25 +16,27 @@ DataFrame make_bayes_choice_dictionary_cpp(
   // Prepare output vectors
   CharacterVector observed_out(K);
   CharacterVector standard_out(K);
+  NumericVector p_standard_out(K, NA_REAL);
 
-  // Initialize progress bar
+  // Progress bar
   Environment utils = Environment::namespace_env("utils");
   Function txt_pb = utils["txtProgressBar"];
   Function set_pb = utils["setTxtProgressBar"];
   RObject pb = txt_pb(Named("min", 0), Named("max", K), Named("style", 3));
 
-  // Precompute transpose for efficient row access
+  // Transpose for row‐access
   arma::sp_mat Dt = D.t();
 
+  // 1) Determine standard_out for each i
   for (int i = 0; i < K; ++i) {
     checkUserInterrupt();
     observed_out[i] = names[i];
     standard_out[i] = NA_STRING;
 
-    // 1) Self posterior
+    // self‐posterior
     double phi_self = (1.0 - delta) * p[i];
 
-    // 2) Extract neighbors
+    // neighbors of i
     const arma::uword* col_ptrs = Dt.col_ptrs;
     const arma::uword* row_inds = Dt.row_indices;
     const double*      values   = Dt.values;
@@ -44,15 +44,14 @@ DataFrame make_bayes_choice_dictionary_cpp(
     arma::uword end   = col_ptrs[i + 1];
     int M = static_cast<int>(end - start);
 
-    // 3) Compute neighbor contributions
+    // weight vector
     NumericVector w(M);
     for (int m = 0; m < M; ++m) {
-      double d = values[start + m];
-      w[m] = std::exp(-d / lambda);
+      w[m] = std::exp(-values[start + m] * lambda);
     }
     if (M > 0 && sum(w) > 0) w = w / sum(w);
 
-    // 4) Compute full posterior vector (self + neighbors)
+    // full posterior vector
     int N = 1 + M;
     NumericVector all_phi(N);
     all_phi[0] = phi_self;
@@ -61,36 +60,48 @@ DataFrame make_bayes_choice_dictionary_cpp(
       all_phi[m + 1] = delta * p[j] * w[m];
     }
 
-    // 5) Normalize
+    // normalize
     double tot = sum(all_phi);
     if (tot > 0) all_phi = all_phi / tot;
 
-    // 6) Identify max and check uniqueness
+    // find unique max
     double mx = max(all_phi);
-    int count_max = 0;
-    int idx_max = -1;
+    int count_max = 0, idx_max = -1;
     for (int k2 = 0; k2 < N; ++k2) {
       if (all_phi[k2] == mx) {
         count_max++;
         idx_max = k2;
       }
     }
-    // Only record if unique and non-zero
     if (count_max == 1 && mx > 0) {
-      // idx_max==0 means self; else neighbor at row_inds
       if (idx_max == 0) {
         standard_out[i] = names[i];
       } else {
-        standard_out[i] = names[ row_inds[start + (idx_max - 1)] ];
+        standard_out[i] = names[row_inds[start + (idx_max - 1)]];
       }
     }
 
-    // Advance progress bar
     set_pb(pb, i + 1);
   }
 
+  // 2) Compute p_standard sums for each group
+  std::map<std::string, double> sum_p;
+  for (int i = 0; i < K; ++i) {
+    if (standard_out[i] != NA_STRING) {
+      std::string st = Rcpp::as<std::string>(standard_out[i]);
+      sum_p[st] += p[i];
+    }
+  }
+  for (int i = 0; i < K; ++i) {
+    if (standard_out[i] != NA_STRING) {
+      std::string st = Rcpp::as<std::string>(standard_out[i]);
+      p_standard_out[i] = sum_p[st];
+    }
+  }
+
   return DataFrame::create(
-    Named("observed") = observed_out,
-    Named("standard") = standard_out
+    Named("observed")    = observed_out,
+    Named("standard")    = standard_out,
+    Named("p_standard")  = p_standard_out
   );
 }

@@ -10,20 +10,17 @@
 #'               input to `make_bayes_choice_dictionary()`, e.g. using
 #'               `clean_surnames()` for English-language surnames.
 #' @param dictionary The output of `make_bayes_choice_dictionary()`.
-#'               data.frame with five columns:
+#'               data.frame with two columns:
 #'                      $observed: character vector of observed, noisy names
 #'                      $standard: character vector of standardized names
-#'                      $posterior: numeric vector of posterior probabilities
-#'                      $bayes_choice: integer indicating the posterior mode
-#'                      $p_standard: numeric vector containing frequency of the standard name
+#'                      $p_standard: positive numeric vector of name frequencies
+#' @param lambda Postive number equal to the posterior mean; i.e.`mean(post$lambda)`
+#' @param delta Postive number equal to the posterior mean; i.e.`mean(post$delta)`
+#'              from the output of `draw_gibbs()`.
 #' @param method  method   Character scalar; distance metric passed to
 #'                 `stringdist::stringdist()`.  Common choices: `"jw"`, `"lv"`
 #'                 should match the method used in the original dictionary.
 #'                 Default is "jw".
-#' @param lambda   Should match the `lambda` argument in `draw_gibbs()`.
-#'               Numeric; fixed scale parameter for error kernel (default 0.01)
-#' @param delta Postive number equal to the posterior mean; i.e.`mean(post$delta_samples)`
-#'              from the output of `draw_gibbs()`, defaults to 0.01.
 #' @param ncores   Integer ≥ 1; number of parallel worker processes to launch.
 #'                 Defaults to 1.
 #'
@@ -38,9 +35,9 @@
 standardize_names <- function(
     names,
     dictionary,
+    lambda,
+    delta,
     method = "jw",
-    lambda = 1e-2,
-    delta = 1e-2,
     ncores = 1
 ) {
 
@@ -52,9 +49,8 @@ standardize_names <- function(
   }
 
   # Creating a set of standard names from the dictionary
-  standard_names <- subset(dictionary, bayes_choice == 1)
-  standard_names <- subset(standard_names, !duplicated(standard))
-  standard_names[,c("observed","bayes_choice","posterior")] <- NULL
+  standard_names <- subset(dictionary, !duplicated(standard))
+  standard_names$observed <- NULL
 
   # Splitting off names missing from the dictionary
   missing_observed <- names[ !(names %in% dictionary$observed)] |> unique()
@@ -78,25 +74,26 @@ standardize_names <- function(
     )
 
     # Making a new dictionary for missing names
-    missing_standard <- pbsapply(
-      X = missing_observed,
+    chunks <- split(missing_observed,ceiling(seq_along(missing_observed) / 100))
+    results_list <- pbapply::pblapply(
+      X   = chunks,
       FUN = standardize_missing_name,
-      cl = cl)
+      cl  = cl
+    )
+    missing_standard <- unlist(results_list, use.names = FALSE)
 
     # clean up
     parallel::stopCluster(cl)
 
     # Binding old and new dictionaries
-    dictionary <- subset(dictionary, bayes_choice == 1)
-    dictionary[,c("posterior","bayes_choice","p_standard")] <- NULL
+    dictionary$p_standard <- NULL
     new_dictionary <- as.data.frame(cbind(missing_observed, missing_standard))
     colnames(new_dictionary) <- c("observed","standard")
     full_dictionary <- rbind(dictionary, new_dictionary)
 
   } else {
     # There are no terms missing from the dictionary, so jumping to the merge step
-    dictionary <- subset(dictionary, bayes_choice == 1)
-    dictionary[,c("posterior","bayes_choice","p_standard")] <- NULL
+    dictionary$p_standard <- NULL
     full_dictionary <- dictionary
 
   }
