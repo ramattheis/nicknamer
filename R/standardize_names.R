@@ -82,10 +82,12 @@ standardize_names <- function(
 
     # clean up
     parallel::stopCluster(cl)
+    rm(cl)
 
     # Binding old and new dictionaries
     dictionary$p_standard <- NULL
     new_dictionary <- as.data.frame(cbind(missing_observed, missing_standard))
+    row.names(new_dictionary) <- NULL
     colnames(new_dictionary) <- c("observed","standard")
     full_dictionary <- rbind(dictionary, new_dictionary)
 
@@ -100,6 +102,6 @@ standardize_names <- function(
   idx <- match(names, full_dictionary$observed)
 
   # pull out the standard names
-  dictionary$standard[idx]
+  full_dictionary$standard[idx]
 
 }

@@ -23,22 +23,17 @@ us_dictionary = make_bayes_choice_dictionary(
   nb$D,
   post$p_mean,
   delta = 0.1,
-  lambda = 1000
+  lambda = 250
+)
+
+us_names = standardize_names(
+  names = tail(all_surnames,n=2000),
+  dictionary = us_dictionary,
+  lambda = 250,
+  delta = 0.1,
+  method = "jw",
+  ncores = 10
 )
 
 
-#names = tail(all_surnames,n=400)
-#dictionary = us_dictionary
-#lambda = 1000
-#delta = 0.1
-#method = "jw"
-#ncores = 2
 
-us_names = standardize_names(
-  names = tail(all_surnames,n=200),
-  dictionary = us_dictionary,
-  lambda = 1000,
-  delta = 0.1,
-  method = "jw",
-  ncores = 2
-  )
