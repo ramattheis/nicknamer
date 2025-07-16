@@ -5,6 +5,8 @@ library(nicknamer)
 # Reloading the tabulation of all (cleaned) surnames in the census
 surnames = fread("~/Downloads/us_surnames.csv")
 
+us_dictionary <- load_us_dictionary()
+
 # Removing surnames with fewer than 10 obs and no missing chars (~4.4% of individuals omitted)
 all_surnames = surnames$namelast
 surnames = surnames[n>10  & !grepl("\\?",namelast)]
@@ -27,12 +29,12 @@ us_dictionary = make_bayes_choice_dictionary(
 )
 
 us_names = standardize_names(
-  names = tail(all_surnames,n=2000),
+  names = all_surnames,
   dictionary = us_dictionary,
   lambda = 250,
   delta = 0.1,
   method = "jw",
-  ncores = 10
+  ncores = 12
 )
 
 
