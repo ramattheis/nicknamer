@@ -15,7 +15,7 @@
 standardize_us_surnames <- function(names) {
 
   # Checking -- does it seem like names are cleaned?
-  if(any(grepl("[A-Z0-9[:punct:]]",names))){
+  if(any(grepl("[A-Z0-9[:punct:]]",names) & !grepl("\\?",names))){
     stop("`names` has upper case letters, numbers, or punctuation. Apply `clean_surnames()` before `standardize_us_surnames()`.")
     }
 
