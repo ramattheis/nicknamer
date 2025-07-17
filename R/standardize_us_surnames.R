@@ -14,7 +14,15 @@
 #' @export
 standardize_us_surnames <- function(names) {
 
-  # Downloading US surname dictionary
+  # Checking -- does it seem like names are cleaned?
+  if(any(grepl("[A-Z0-9[:punct:]]",names))){
+    stop("`names` has upper case letters, numbers, or punctuation. Apply `clean_surnames()` before `standardize_us_surnames()`.")
+    }
 
+  # Downloading US surname dictionary
+  us_dictionary <- load_us_dictionary()
+
+  # Merging and returning
+  us_dictionary[match(names, us_dictionary$observed),"standard"]
 
 }

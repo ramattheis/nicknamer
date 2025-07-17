@@ -15,7 +15,7 @@ load_us_dictionary <- function() {
     return(.nicknamerenv$us_surnames_dictionary_cache)
   }
 
-  message("Downloading US dictionary... this might take a while...")
+  message("Downloading US surname dictionary... this might take a while...")
 
   tryCatch({
 
