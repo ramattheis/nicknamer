@@ -1,0 +1,29 @@
+[build-system]
+requires = ["setuptools>=61"]
+build-backend = "setuptools.backends.legacy:build"
+
+[project]
+name = "nicknamer"
+version = "1.0.0"
+description = "Toolbox for cleaning and standardizing names"
+authors = [
+  {name = "Ross Mattheis", email = "ramattheis@gmail.com"},
+]
+license = {text = "MIT"}
+requires-python = ">=3.9"
+dependencies = [
+    "numpy>=1.21",
+    "scipy>=1.7",
+    "pandas>=1.3",
+    "rapidfuzz>=3.0",
+    "tqdm>=4.0",
+    "requests>=2.25",
+    "pyreadr>=0.4",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+
+[tool.setuptools.packages.find]
+where = ["."]
+include = ["nicknamer*"]
