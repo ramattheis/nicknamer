@@ -1,2 +1,9 @@
 ^nicknamer\.Rproj$
 ^\.Rproj\.user$
+^\.DS_Store$
+^README\.html$
+^misc$
+^tests$
+^nicknamer$
+^pyproject\.toml$
+^setup\.py$

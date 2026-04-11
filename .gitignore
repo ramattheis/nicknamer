@@ -1,1 +1,22 @@
+# R
 .Rproj.user
+.Rhistory
+.RData
+.DS_Store
+
+# R package compiled artifacts
+src/*.o
+src/*.so
+src/*.dll
+
+# Rendered docs
+README.html
+
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+dist/
+build/
+.eggs/
