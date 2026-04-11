@@ -1,5 +1,6 @@
 # nicknamer
 
+<<<<<<< HEAD
 `nicknamer` is an R package for standardizing and cleaning lists of names. It was designed primarily for English-language surnames in historical US census data, where names are frequently misspelled, truncated, or otherwise garbled. The package provides both a fast-path wrapper for US surnames and a general-purpose pipeline for any name list, grounded in an simple probabilistic model of name garbling. This version of `nicknamer` was made with the help of Claude Opus 4.6. 
 
 ## Installation
@@ -58,71 +59,111 @@ dictionary <- make_bayes_choice_dictionary(
 
 standard_names <- standardize_names(names = my_names, dictionary = dictionary,
                              lambda = mean(out$lambda), delta = mean(out$delta))
+=======
+`nicknamer` is an R package — with a full Python port — that collects tools for standardizing and cleaning lists of names. It is designed primarily for historical US census surnames but applies broadly to any English-language name data.
+
+---
+
+## How it works
+
+The package implements a **Bayesian garbling model**. The core idea is that an observed name $s_i$ is a noisy version of a true name $s_j$, where the noise process is characterised by two parameters:
+
+- **δ (delta)** — the probability that a name is garbled at all.
+- **λ (lambda)** — the exponential decay rate controlling how much garbling is penalised for larger edit distances.
+
+Given a corpus of name counts, the package:
+
+1. Cleans raw strings (`clean_surnames`).
+2. Builds a sparse neighbor graph of similar names (`find_neighbors`).
+3. Estimates δ and λ from the data via a Gibbs / Metropolis-Hastings sampler (`draw_gibbs`).
+4. Constructs a Bayes-optimal mapping from every observed name to its most likely true name (`make_bayes_choice_dictionary`, `standardize_names`).
+
+---
+
+## R installation
+
+```r
+# install directly from GitHub
+remotes::install_github("ramattheis/nicknamer")
 ```
 
 ---
 
-## The Garbling Model
+## Python installation
 
-The probabilistic model formalizes the idea that what an enumerator writes down is either the true surname, or a garbled variant drawn from the set of nearby names. There are three latent quantities:
+The Python port mirrors every R function exactly (verified against R output to floating-point precision).
 
-- **p** — a K-vector of true population name frequencies, where K is the number of distinct names.
-- **δ ∈ (0, 1)** — the *garbling probability*: the chance that a recorded name has been corrupted.
-- **λ > 0** — the *decay rate*: controls how steeply the probability of corruption falls off with string distance.
+### From GitHub
 
-### Observation model
+```bash
+pip install "git+https://github.com/ramattheis/nicknamer.git"
+```
 
-For each person in the data, their true surname is drawn from the population distribution p. With probability (1 − δ) it is recorded correctly; with probability δ it is "mutated" to a neighboring name j, with probability proportional to exp(−λ · d_{ij}), where d_{ij} is the string distance between names i and j (restricted to the neighbor graph M).
+### From a local clone
 
-This defines a K × K transition kernel K(i | j) = P(observed = i | true = j):
+```bash
+git clone https://github.com/ramattheis/nicknamer.git
+cd nicknamer
+pip install -e .
+```
 
-- **On the diagonal** (i = j): K(i | i) = 1 − δ
-- **Off the diagonal** (i ≠ j, neighbors): K(i | j) = δ · E(j, i), where E is the row-normalized weight matrix with E(j, i) ∝ exp(−λ · d_{ji}) · M_{ji}
-- **Non-neighbors**: K(i | j) = 0
+### Dependencies
 
-The marginal probability of observing name i is then the mixture:
+`numpy`, `scipy`, `pandas`, `rapidfuzz`, `tqdm`, `requests`, `pyreadr`
 
-L_i = Σ_j p_j · K(i | j)
-
-and the log-likelihood of the observed name counts n_obs is Σ_i n_obs,i · log(L_i).
-
-### Priors
-
-- **p** ~ Dirichlet(α), with α = 1 (uniform) by default.
-- **δ** ~ Beta(9, 1) by default, encoding a prior belief that most names are recorded correctly (high δ would mean pervasive garbling).
-- **λ** ~ Gamma(1, 0.1) by default.
-
-All priors can be overridden in `draw_gibbs()`.
-
-### Posterior inference
-
-`draw_gibbs()` uses an MH-within-Gibbs sampler:
-
-1. **p** is updated via a collapsed Gibbs step. Expected counts are computed from the current kernel, and a new p is drawn from the resulting Dirichlet posterior.
-2. **δ and λ** are updated jointly via a Metropolis-Hastings random walk in logit(δ) / log(λ) space, with a Jacobian correction so that the proposal is symmetric on the transformed scale.
-
-The sampler stores the full chains for δ and λ, the log-likelihood at each step, and the first five entries of p. It also accumulates the posterior mean of p over the second half of the chain (used as the point estimate passed to `make_bayes_choice_dictionary()`).
-
-### Standardization rule
-
-Given posterior means δ̂ and λ̂ and the posterior mean p̂, the Bayes-optimal standard name for each observed name s_i is the s_j that maximizes the posterior probability:
-
-Pr(true = s_j | observed = s_i, δ̂, λ̂, p̂)
-
-subject to s_j being "credible" — included as a plausible true name in at least 99% of posterior draws (the set C). This is computed efficiently in C++ via `make_bayes_choice_dictionary_cpp()`.
+These are installed automatically by pip. Python ≥ 3.9 is required.
 
 ---
 
-## Functions
+## Python quick-start
 
-| Function | Description |
-|---|---|
-| `clean_surnames()` | Normalize raw surname strings for downstream processing |
-| `find_neighbors()` | Build sparse distance (D) and mask (M) matrices |
-| `draw_gibbs()` | MH-within-Gibbs sampler for δ, λ, and p |
-| `make_kernel()` | Construct the K×K garbling transition kernel |
-| `loglikelihood()` | Evaluate the log-likelihood of observed counts |
-| `make_bayes_choice_dictionary()` | Map each name to its Bayes-optimal standard form |
-| `standardize_names()` | Apply a dictionary to standardize a name vector |
-| `standardize_us_surnames()` | Fast-path standardization for US historical surnames |
-| `synthetic_name_counts()` | Generate synthetic name count data for testing |
+```python
+from nicknamer import (
+    clean_surnames,
+    find_neighbors,
+    draw_gibbs,
+    make_bayes_choice_dictionary,
+    standardize_names,
+)
+import numpy as np
+
+# 1) Clean raw surname strings
+raw   = ["SMITH", "O'Brien", "Smyth", "jones jr.", "Smit"]
+clean = clean_surnames(raw)
+# → ['smith', 'obrien', 'smyth', 'jones', 'smit']
+
+# 2) Build a name-count table (unique names + their frequencies)
+names  = ["smith", "smyth", "smit", "jones", "john"]
+counts = np.array([500, 40, 15, 300, 80], dtype=float)
+
+# 3) Compute pairwise Jaro-distance neighbor graph
+nm = find_neighbors(names, method="jw", max_dist=0.2)
+D, M = nm["D"], nm["M"]
+
+# 4) Estimate δ and λ via Gibbs sampling
+post = draw_gibbs(D, M, n_obs=counts, n_iter=5000)
+delta  = float(np.mean(post["delta"][2500:]))
+lambda_ = float(np.mean(post["lambda_"][2500:]))
+
+# 5) Build Bayes-optimal dictionary
+p = counts / counts.sum()
+dictionary = make_bayes_choice_dictionary(names, D, p, delta, lambda_)
+
+# 6) Standardize a new list of observed names
+observed = ["smyth", "smit", "jones", "smith"]
+standard = standardize_names(observed, dictionary, lambda_=lambda_, delta=delta)
+```
+
+### US historical census shortcut
+
+If you only need to standardize US historical census surnames, a pre-built dictionary is available:
+
+```python
+from nicknamer import clean_surnames, standardize_us_surnames
+
+raw      = ["SMITH", "Smythe", "O'Brien", "Joans"]
+cleaned  = clean_surnames(raw)
+standard = standardize_us_surnames(cleaned)
+```
+
+The first call downloads the dictionary (~30 MB) and caches it for the rest of the session.
