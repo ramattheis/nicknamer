@@ -33,6 +33,81 @@ Requires Python ≥ 3.9. Dependencies (`numpy`, `scipy`, `pandas`, `rapidfuzz`, 
 
 ## Workflow
 
+### US historical first names
+
+`clean_firstnames()` is the starting point for first-name standardization. Unlike surnames, single-character names are **not** blanked — "J" and "Wm" are valid and common in historical census records.
+
+```r
+# Step 1: extract middle initial (optional, done on raw strings)
+mid <- grab_middle_initial(dt$namefirst)
+
+# Step 2: clean first names
+dt[, firstname := clean_firstnames(namefirst)]  # drops middle name by default
+```
+
+```python
+from nicknamer import clean_firstnames, grab_middle_initial
+mid       = grab_middle_initial(df["namefirst"].tolist())
+firstnames = clean_firstnames(df["namefirst"].tolist())
+```
+
+After cleaning, call `standardize_nicknames()` to map colloquial forms to their canonical equivalents (e.g. "bob" → "robert", "betty" → "elizabeth"). When `sex` is supplied, ambiguous nicknames are resolved by sex (e.g. "alex" → "alexander" for males, "alexandra" for females).
+
+```r
+standard_first <- standardize_nicknames(clean_firstnames(dt$namefirst), sex = dt$sex)
+```
+
+```python
+from nicknamer import clean_firstnames, standardize_nicknames
+
+standard_first = standardize_nicknames(
+    clean_firstnames(df["namefirst"].tolist()),
+    sex=df["sex"].tolist()
+)
+```
+
+#### Why no Bayesian spelling model for first names?
+
+The Bayesian garbling model used for `standardize_us_surnames()` assumes that observed names are noisy draws from a small set of true canonical forms. This works well for **surnames**, whose distribution is highly concentrated — a handful of common names account for the vast majority of observations, and garbled variants cluster tightly around them.
+
+**First names have a fundamentally different structure.** The distribution is much flatter, with hundreds of thousands of genuinely distinct given names. When we fitted the model to 1940 US census first-name data (separately by sex, using a Jaro distance threshold of 0.08 selected through careful analysis of misspelling patterns), the posterior garbling probability converged to essentially zero (δ ≈ 0.00005) regardless of the parameterization. The model correctly diagnosed that nearly every observed first-name string is its own canonical form — leaving almost no scope for spelling correction.
+
+For first names, the meaningful standardization comes from **abbreviation expansion** (`clean_firstnames()`) and **nickname resolution** (`standardize_nicknames()`), not from spelling correction.
+
+---
+
+#### Abbreviation expansion
+
+`clean_firstnames()` expands the following conservative set of census abbreviations by default (`expand_abbreviations = TRUE`). Only unambiguous single-name abbreviations are included — "J" is deliberately excluded because it could represent John, James, Joseph, and others.
+
+| Abbreviation | Expansion   |
+|---|---|
+| wm           | william     |
+| thos         | thomas      |
+| jno          | john        |
+| jhn          | john        |
+| jas          | james       |
+| chas         | charles     |
+| geo          | george      |
+| benj         | benjamin    |
+| robt         | robert      |
+| richd        | richard     |
+| edwd         | edward      |
+| saml         | samuel      |
+| danl         | daniel      |
+| michl        | michael     |
+| nathl        | nathaniel   |
+| alexr        | alexander   |
+| abm          | abraham     |
+| christr      | christopher |
+| nichs        | nicholas    |
+| andr         | andrew      |
+| lawr         | lawrence    |
+| archd        | archibald   |
+| eliz         | elizabeth   |
+
+---
+
 ### US historical surnames
 
 For US historical surnames specifically, `standardize_us_surnames()` bundles a pre-fitted dictionary and skips steps 2–4 entirely:
@@ -153,13 +228,18 @@ All priors can be overridden in `draw_gibbs()`.
 | Function | Description |
 |---|---|
 | `clean_surnames()` | Normalize raw surname strings for downstream processing |
+| `clean_firstnames()` | Normalize raw first-name strings; expands census abbreviations |
+| `grab_middle_initial()` | Extract middle initial from raw first-name strings |
 | `find_neighbors()` | Build sparse distance (D) and mask (M) matrices |
 | `draw_gibbs()` | MH-within-Gibbs sampler for δ, λ, and p |
 | `make_kernel()` | Construct the K×K garbling transition kernel |
 | `loglikelihood()` | Evaluate the log-likelihood of observed counts |
 | `make_bayes_choice_dictionary()` | Map each name to its Bayes-optimal standard form |
 | `standardize_names()` | Apply a dictionary to standardize a name vector |
+| `standardize_missing_name()` | Find the Bayes-optimal form for a name absent from the dictionary |
+| `standardize_nicknames()` | Map spelling-standardized first names to canonical forms |
 | `standardize_us_surnames()` | Fast-path standardization for US historical surnames |
 | `load_us_dictionary()` | Download and cache the US census surname dictionary |
+| `load_nickname_dictionary()` | Download and cache the nickname lookup table |
 | `synthetic_name_counts()` | Generate synthetic garbled name-count data for testing |
 | `rdirichlet()` | Draw a single sample from a Dirichlet distribution |

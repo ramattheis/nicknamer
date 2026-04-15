@@ -230,6 +230,94 @@ if (!is.null(us_dict)) {
 }
 
 # =============================================================================
+cat("\n=== 11. clean_firstnames ===\n")
+# =============================================================================
+
+raw_first <- c("JOHN Edward", "Wm", "Thos Jr.", "J", "Mary Ann",
+               "jno", "Elizabeth", "??unreadable??", NA)
+cf <- clean_firstnames(raw_first)
+
+check("returns same length as input",    length(cf) == length(raw_first))
+check("JOHN Edward → john (drops middle)", cf[1] == "john")
+check("Wm → william (abbreviation)",     cf[2] == "william")
+check("Thos Jr. → thomas",              cf[3] == "thomas")
+check("J is kept (not blanked)",         cf[4] == "j")
+check("Mary Ann → mary (drops middle)", cf[5] == "mary")
+check("jno → john (abbreviation)",      cf[6] == "john")
+check("Elizabeth → elizabeth",           cf[7] == "elizabeth")
+check("unreadable → blank",              cf[8] == "")
+check("NA → NA",                         is.na(cf[9]))
+
+# drop_middle = FALSE keeps full first name
+cf2 <- clean_firstnames(c("John Edward"), drop_middle = FALSE)
+check("drop_middle=FALSE keeps full name", cf2[1] == "john?edward")
+
+# expand_abbreviations = FALSE preserves abbreviation
+cf3 <- clean_firstnames(c("Wm"), expand_abbreviations = FALSE)
+check("expand_abbreviations=FALSE keeps wm", cf3[1] == "wm")
+
+# =============================================================================
+cat("\n=== 12. grab_middle_initial ===\n")
+# =============================================================================
+
+raw_mi <- c("John Edward", "Mary Ann", "John", "J E", "William Jr.", NA)
+mi <- grab_middle_initial(raw_mi)
+
+check("returns same length as input",    length(mi) == length(raw_mi))
+check("John Edward → E",                mi[1] == "E")
+check("Mary Ann → A",                   mi[2] == "A")
+check("John (no middle) → NA",          is.na(mi[3]))
+check("J E → E",                        mi[4] == "E")
+check("Jr. stripped before split",      is.na(mi[5]))
+check("NA → NA",                         is.na(mi[6]))
+
+# =============================================================================
+cat("\n=== 13. load_nickname_dictionary ===\n")
+# =============================================================================
+
+cat("  Downloading nickname dictionary...\n")
+nick_dict <- tryCatch(
+  load_nickname_dictionary(),
+  error = function(e) {
+    cat(sprintf("  FAIL  download failed: %s\n", conditionMessage(e)))
+    fail <<- fail + 1L
+    NULL
+  }
+)
+
+if (!is.null(nick_dict)) {
+  check("returns a data.frame",              is.data.frame(nick_dict))
+  check("has 'nickname' column",             "nickname"  %in% colnames(nick_dict))
+  check("has 'canonical' column",            "canonical" %in% colnames(nick_dict))
+  check("has 'sex' column",                  "sex"       %in% colnames(nick_dict))
+  check("at least 100 rows",                 nrow(nick_dict) >= 100)
+  check("bob maps to robert",
+        any(nick_dict$nickname == "bob" & nick_dict$canonical == "robert"))
+  check("second call uses cache",
+        identical(nick_dict, load_nickname_dictionary()))
+
+  # =============================================================================
+  cat("\n=== 14. standardize_nicknames ===\n")
+  # =============================================================================
+
+  test_nicks <- c("bob", "betty", "alex", "john", "notanickname")
+  std_nicks  <- standardize_nicknames(test_nicks, dictionary = nick_dict)
+
+  check("returns same length as input",      length(std_nicks) == length(test_nicks))
+  check("bob → robert",                      std_nicks[1] == "robert")
+  check("betty → elizabeth",                 std_nicks[2] == "elizabeth")
+  check("alex maps to something",            !is.na(std_nicks[3]))
+  check("john (not a nickname) unchanged",   std_nicks[4] == "john")
+  check("unknown name unchanged",            std_nicks[5] == "notanickname")
+
+  # Sex filtering
+  std_male   <- standardize_nicknames("alex", sex = "male",   dictionary = nick_dict)
+  std_female <- standardize_nicknames("alex", sex = "female", dictionary = nick_dict)
+  check("alex male → alexander",             std_male[1]   == "alexander")
+  check("alex female → alexandra",           std_female[1] == "alexandra")
+}
+
+# =============================================================================
 cat("\n=== Summary ===\n")
 # =============================================================================
 

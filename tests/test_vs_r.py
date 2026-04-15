@@ -18,6 +18,8 @@ import pandas as pd
 sys.path.insert(0, os.path.dirname(os.path.dirname(__file__)))
 
 from nicknamer.clean_surnames import clean_surnames
+from nicknamer.clean_firstnames import clean_firstnames
+from nicknamer.grab_middle_initial import grab_middle_initial
 from nicknamer.make_kernel import make_kernel
 from nicknamer.loglikelihood import loglikelihood
 from nicknamer.find_neighbors import find_neighbors
@@ -226,6 +228,58 @@ check("sorted descending",  snc_py["count"].is_monotonic_decreasing)
 # R has same nrow (row count depends on random seed — just check same ballpark)
 check(f"nrow in [100, 10000] (got {len(snc_py)})", 100 <= len(snc_py) <= 10000)
 check("no duplicate names", snc_py["name"].nunique() == len(snc_py))
+
+
+# =============================================================================
+print("\n=== 8. clean_firstnames ===")
+# =============================================================================
+
+# Basic cleaning cases (no R reference file needed — logic is deterministic)
+_cf_inputs = [
+    "JOHN Edward", "Wm", "Thos Jr.", "J", "Mary Ann",
+    "jno", "Elizabeth", "??unreadable??", None,
+]
+_cf_expected = [
+    "john", "william", "thomas", "j", "mary",
+    "john", "elizabeth", "", None,
+]
+cf_py = clean_firstnames(_cf_inputs)
+
+check("clean_firstnames: same length as input", len(cf_py) == len(_cf_inputs))
+check("JOHN Edward → john",        cf_py[0] == "john")
+check("Wm → william",              cf_py[1] == "william")
+check("Thos Jr. → thomas",        cf_py[2] == "thomas")
+check("J kept (not blanked)",      cf_py[3] == "j")
+check("Mary Ann → mary",           cf_py[4] == "mary")
+check("jno → john",                cf_py[5] == "john")
+check("Elizabeth → elizabeth",     cf_py[6] == "elizabeth")
+check("unreadable → ''",           cf_py[7] == "")
+check("None → None",               cf_py[8] is None)
+
+# drop_middle=False keeps full name
+cf_dm = clean_firstnames(["John Edward"], drop_middle=False)
+check("drop_middle=False keeps full name", cf_dm[0] == "john?edward")
+
+# expand_abbreviations=False preserves abbreviation
+cf_ea = clean_firstnames(["Wm"], expand_abbreviations=False)
+check("expand_abbreviations=False keeps wm", cf_ea[0] == "wm")
+
+
+# =============================================================================
+print("\n=== 9. grab_middle_initial ===")
+# =============================================================================
+
+_mi_inputs   = ["John Edward", "Mary Ann", "John", "J E", "William Jr.", None]
+_mi_expected = ["E", "A", None, "E", None, None]
+mi_py = grab_middle_initial(_mi_inputs)
+
+check("grab_middle_initial: same length", len(mi_py) == len(_mi_inputs))
+check("John Edward → E",        mi_py[0] == "E")
+check("Mary Ann → A",           mi_py[1] == "A")
+check("John → None",            mi_py[2] is None)
+check("J E → E",                mi_py[3] == "E")
+check("Jr. stripped → None",    mi_py[4] is None)
+check("None → None",            mi_py[5] is None)
 
 
 # =============================================================================

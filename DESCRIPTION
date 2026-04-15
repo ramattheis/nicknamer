@@ -1,6 +1,6 @@
 Package: nicknamer
 Title: Toolbox for Cleaning Names
-Version: 1.0.0
+Version: 1.1.0
 Authors@R: 
     person("Ross", "Mattheis", , "ramattheis@gmail.com", role = c("aut", "cre"))
 Description: Collects tools for standardizing and cleaning lists of names, such as messy surnames in census data.
@@ -9,7 +9,7 @@ Encoding: UTF-8
 Roxygen: list(markdown = FALSE)
 RoxygenNote: 7.3.2
 LinkingTo: Rcpp, RcppArmadillo
-Imports: Rcpp (>= 1.0), Matrix, stats
+Imports: Rcpp (>= 1.0), Matrix, stats, pbapply, stringdist, parallel
 NeedsCompilation: yes
 Packaged: 2025-05-29 22:16:40 UTC; ross
 Author: Ross Mattheis [aut, cre]

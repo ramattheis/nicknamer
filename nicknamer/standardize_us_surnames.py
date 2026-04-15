@@ -30,21 +30,7 @@ def standardize_us_surnames(names: List[str]) -> List[Optional[str]]:
         than ``"?"``.
     """
     # Guard: reject uncleaned input (mirrors the R check)
-    bad = [
-        n for n in names
-        if re.search(r"[A-Z0-9]", n) or (re.search(r"[[:punct:]]", n, re.ASCII) and "?" not in n)
-    ]
-    # Simpler portable version of the R check
-    def _looks_uncleaned(s: str) -> bool:
-        if not s:
-            return False
-        has_upper_or_digit = bool(re.search(r"[A-Z0-9]", s))
-        has_punct_not_q = bool(re.search(r"[^\w?]", s)) or (
-            re.search(r"[_]", s) is not None
-        )
-        return has_upper_or_digit
-
-    if any(_looks_uncleaned(n) for n in names):
+    if any(bool(re.search(r"[A-Z0-9]", n)) for n in names if n):
         raise ValueError(
             "`names` has upper-case letters or digits. "
             "Apply `clean_surnames()` before `standardize_us_surnames()`."

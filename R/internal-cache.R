@@ -3,3 +3,4 @@
 
 # Initialize the cache slot for the dictionary within this environment
 .nicknamerenv$us_surnames_dictionary_cache <- NULL
+.nicknamerenv$nickname_dictionary_cache    <- NULL
