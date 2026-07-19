@@ -151,15 +151,29 @@ load_us_dictionary(path = "us_dictionary.rds")
 standard_names <- standardize_us_surnames(clean_surnames(raw_names))
 ```
 
+```python
+from nicknamer import load_us_dictionary, clean_surnames, standardize_us_surnames
+
+# Load the manually downloaded dictionary once per session
+load_us_dictionary(path="us_dictionary.rds")
+
+# ...then use the standardizer as normal (no download happens)
+standard_names = standardize_us_surnames(clean_surnames(raw_names))
+```
+
 Other options:
 
 - **Persistent cache.** After a successful download, the dictionary is stored in
-  a per-user cache directory (`tools::R_user_dir("nicknamer", "cache")`) and
-  reused automatically in later sessions. You can point this somewhere else —
-  for example a shared project directory on a cluster — with
-  `load_us_dictionary(cache_dir = "/path/to/shared/cache")`.
-- **Force a fresh copy.** `load_us_dictionary(refresh = TRUE)` ignores any cached
-  copy and re-downloads.
+  a per-user cache directory and reused automatically in later sessions. In R
+  this is `tools::R_user_dir("nicknamer", "cache")`; in Python it is the
+  platform user-cache directory (e.g. `~/.cache/nicknamer` on Linux). You can
+  point this somewhere else — for example a shared project directory on a
+  cluster — with `load_us_dictionary(cache_dir = "/path/to/shared/cache")` in R,
+  or `load_us_dictionary(cache_dir="/path/to/shared/cache")` in Python (the
+  `NICKNAMER_CACHE_DIR` environment variable works too).
+- **Force a fresh copy.** `load_us_dictionary(refresh = TRUE)` in R, or
+  `load_us_dictionary(refresh=True)` in Python, ignores any cached copy and
+  re-downloads.
 
 ### Any list of names
 
