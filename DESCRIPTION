@@ -1,6 +1,6 @@
 Package: nicknamer
 Title: Toolbox for Cleaning Names
-Version: 1.1.0
+Version: 1.1.1
 Authors@R: 
     person("Ross", "Mattheis", , "ramattheis@gmail.com", role = c("aut", "cre"))
 Description: Collects tools for standardizing and cleaning lists of names, such as messy surnames in census data.

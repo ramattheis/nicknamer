@@ -121,7 +121,45 @@ from nicknamer import clean_surnames, standardize_us_surnames
 standard_names = standardize_us_surnames(clean_surnames(raw_names))
 ```
 
-The first call downloads the dictionary (~30 MB) and caches it for the rest of the session.
+The first call downloads the dictionary (~104 MB) and caches it — in memory for the rest of the session, and on disk for future sessions (see [Troubleshooting the dictionary download](#troubleshooting-the-dictionary-download) if the download is slow or fails).
+
+#### Troubleshooting the dictionary download
+
+The dictionary is a single ~104 MB file served as a GitHub release asset. On a
+fast connection `load_us_dictionary()` fetches it automatically and caches it, so
+you should only pay the download cost once per machine. On slow, throttled, or
+firewalled connections (for example, some HPC login/compute nodes) the automatic
+download can time out or fail partway.
+
+If that happens, download the file manually — from a machine or shell with a
+reliable connection — and point the function at it. A resumable downloader such
+as `wget -c` will pick up where it left off if the connection drops:
+
+```bash
+wget -c https://github.com/ramattheis/nicknamer/releases/download/v1.0.0/us_dictionary.rds
+```
+
+Then pass the local file to `load_us_dictionary()` via the `path` argument. This
+skips the download entirely and populates the session cache, so
+`standardize_us_surnames()` will use it directly:
+
+```r
+# Load the manually downloaded dictionary once per session
+load_us_dictionary(path = "us_dictionary.rds")
+
+# ...then use the standardizer as normal (no download happens)
+standard_names <- standardize_us_surnames(clean_surnames(raw_names))
+```
+
+Other options:
+
+- **Persistent cache.** After a successful download, the dictionary is stored in
+  a per-user cache directory (`tools::R_user_dir("nicknamer", "cache")`) and
+  reused automatically in later sessions. You can point this somewhere else —
+  for example a shared project directory on a cluster — with
+  `load_us_dictionary(cache_dir = "/path/to/shared/cache")`.
+- **Force a fresh copy.** `load_us_dictionary(refresh = TRUE)` ignores any cached
+  copy and re-downloads.
 
 ### Any list of names
 

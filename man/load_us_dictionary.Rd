@@ -2,13 +2,39 @@
 % Please edit documentation in R/load_us_dictionary.R
 \name{load_us_dictionary}
 \alias{load_us_dictionary}
-\title{Download, load, and delete a large list of "standardized" surnames from US censuses}
+\title{Download, cache, and load a large list of "standardized" surnames from US censuses}
 \usage{
-load_us_dictionary()
+load_us_dictionary(
+  path = NULL,
+  cache_dir = tools::R_user_dir("nicknamer", "cache"),
+  refresh = FALSE,
+  tries = 3
+)
+}
+\arguments{
+\item{path}{Optional path to a locally downloaded \code{us_dictionary.rds} file.
+If supplied, the file is read directly and no download is attempted. Useful
+when network access is unreliable.}
+
+\item{cache_dir}{Directory used for the persistent on-disk cache. Defaults to
+a per-user cache directory (\code{tools::R_user_dir("nicknamer", "cache")}).
+The downloaded dictionary is stored here so that subsequent sessions load it
+from disk instead of re-downloading.}
+
+\item{refresh}{If \code{TRUE}, ignore any cached copy (in memory or on disk)
+and download a fresh copy. Defaults to \code{FALSE}.}
+
+\item{tries}{Number of times to attempt the download before giving up.
+Defaults to \code{3}.}
 }
 \value{
 A data frame containing a dictionary of observed and "standard" surnames.
 }
 \description{
-Download, load, and delete a large list of "standardized" surnames from US censuses
+Loads the US census surname dictionary used by
+\code{standardize_us_surnames()}. The dictionary is a large (~104 MB) file, so
+it is cached both in memory (for the current session) and on disk (across
+sessions) to avoid repeated downloads. If the automatic download is unreliable
+(e.g. on an HPC node with a slow or firewalled connection), you can download
+the file manually and pass its location via \code{path}.
 }
